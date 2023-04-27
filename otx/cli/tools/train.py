@@ -134,6 +134,16 @@ def get_args():
         "(e.g. 7KiB = 7 * 2^10, 3MB = 3 * 10^6, and 2G = 2 * 2^30).",
     )
     parser.add_argument(
+        "--deterministic",
+        action="store_true",
+        help="Set deterministic to True, default=False.",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="Set seed for training.",
+    )
+    parser.add_argument(
         "--data",
         type=str,
         default=None,
@@ -261,7 +271,9 @@ def train(exit_stack: Optional[ExitStack] = None):  # pylint: disable=too-many-b
         resource_tracker = ResourceTracker(args.track_resource_usage, args.gpus)
         resource_tracker.start()
 
-    task.train(dataset, output_model, train_parameters=TrainParameters())
+    task.train(
+        dataset, output_model, train_parameters=TrainParameters(), seed=args.seed, deterministic=args.deterministic
+    )
 
     if resource_tracker is not None:
         resource_tracker.stop(config_manager.output_path / "resource_usage.yaml")
