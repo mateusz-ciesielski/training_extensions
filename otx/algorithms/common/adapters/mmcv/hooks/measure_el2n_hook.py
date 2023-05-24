@@ -23,7 +23,7 @@ class MeasureEL2NHook(Hook):
     def after_train_epoch(self, runner):
         cur_epoch = runner.epoch
         
-        if cur_epoch % 10 == 0:
+        if cur_epoch % 20 == 0:
             dataset = runner.data_loader.dataset
             collate_fn = runner.data_loader.collate_fn
             batch_size=runner.data_loader.batch_size

@@ -45,7 +45,7 @@ class EL2NSampler(Sampler):  # pylint: disable=too-many-instance-attributes
         else:
             indices = list(range(len(dataset)))
             random.shuffle(indices)
-            self.indices = indices[:budget_size*3]
+            self.indices = indices[::]
 
     def __iter__(self):
         return iter(self.indices)
