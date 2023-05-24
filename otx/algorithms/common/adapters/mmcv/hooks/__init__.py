@@ -49,6 +49,7 @@ from .semisl_cls_hook import SemiSLClsHook
 from .task_adapt_hook import TaskAdaptHook
 from .two_crop_transform_hook import TwoCropTransformHook
 from .unbiased_teacher_hook import UnbiasedTeacherHook
+from .measure_el2n_hook import MeasureEL2NHook
 
 __all__ = [
     "AdaptiveTrainSchedulingHook",

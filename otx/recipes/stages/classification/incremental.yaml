@@ -22,3 +22,6 @@ evaluation:
 task_adapt:
   type: "mpa"
   op: "REPLACE"
+
+custom_hooks:
+  - type: MeasureEL2NHook

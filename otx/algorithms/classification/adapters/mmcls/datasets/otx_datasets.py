@@ -41,6 +41,7 @@ class OTXClsDataset(BaseDataset):
         self.idx_to_label_id = {v: k for k, v in self.label_idx.items()}
         self.empty_label = empty_label
         self.class_acc = False
+        self.el2n = [-1]*len(self.otx_dataset)
 
         self.CLASSES = list(label.name for label in labels)
         self.gt_labels = []  # type: List
@@ -100,7 +101,12 @@ class OTXClsDataset(BaseDataset):
 
         if self.pipeline is None:
             return data_info
-        return self.pipeline(data_info)
+
+        transformed = self.pipeline(data_info)
+        
+        transformed["el2n"] = self.el2n[index]
+        
+        return transformed
 
     def _get_label_id(self, gt_label: np.ndarray) -> Union[ID, List[ID]]:
         return self.idx_to_label_id.get(gt_label.item(), ID())
