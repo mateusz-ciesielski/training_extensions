@@ -37,15 +37,38 @@ class EL2NSampler(Sampler):  # pylint: disable=too-many-instance-attributes
         self.rank = rank
         self.drop_last = drop_last
         
-        if el2n[0] != -1:
-            indices = el2n.argsort()[-budget_size:][::-1]
-            self.indices = indices.tolist()
-            random.shuffle(self.indices)
+        self.img_indices = self.dataset.img_indices
         
+        
+        if dataset.is_el2n_updated > 0:
+            start = 0.1
+            increase = 0 # 0.01 * (dataset.is_el2n_updated - 1)
+            hard_samples = int(budget_size*(start + increase))
+            el2n_sorted = el2n.argsort()
+            hard_indices = el2n_sorted[-hard_samples:][::-1]
+            easy_indices = el2n_sorted[:-hard_samples].tolist()
+            random.shuffle(easy_indices)
+            easy_indices = easy_indices[:budget_size-hard_samples]
+
+            self.indices = []
+            self.indices.extend(hard_indices.tolist())
+            self.indices.extend(easy_indices)
+            random.shuffle(self.indices)
+            logger.info(f"Finding new hard samples... dataset size to {len(self.indices)}")
+
+            """
+            indices = list(range(len(dataset)))
+            random.shuffle(indices)
+            self.indices = indices[:budget_size]
+            
+            logger.info(f"Finding new hard samples... dataset size to {len(self.indices)}")
+            """
         else:
             indices = list(range(len(dataset)))
             random.shuffle(indices)
-            self.indices = indices[::]
+            self.indices = indices[:budget_size*3]
+
+            logger.info(f"Random sampling without replacement... dataset size to {len(self.indices)}")
 
     def __iter__(self):
         return iter(self.indices)

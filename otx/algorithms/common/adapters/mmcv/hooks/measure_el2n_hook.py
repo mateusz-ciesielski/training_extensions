@@ -23,10 +23,13 @@ class MeasureEL2NHook(Hook):
     def after_train_epoch(self, runner):
         cur_epoch = runner.epoch
         
-        if cur_epoch % 20 == 0:
+        if cur_epoch >= 5 and cur_epoch % 3 == 0:
             dataset = runner.data_loader.dataset
             collate_fn = runner.data_loader.collate_fn
             batch_size=runner.data_loader.batch_size
+            dataset.is_el2n_updated = dataset.is_el2n_updated + 1
+            
+            logger.info("el2n updating......")
 
             new_dataloader = DataLoader(
                 dataset,

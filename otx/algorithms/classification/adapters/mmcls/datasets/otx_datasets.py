@@ -42,6 +42,7 @@ class OTXClsDataset(BaseDataset):
         self.empty_label = empty_label
         self.class_acc = False
         self.el2n = [-1]*len(self.otx_dataset)
+        self.is_el2n_updated = 0
 
         self.CLASSES = list(label.name for label in labels)
         self.gt_labels = []  # type: List
