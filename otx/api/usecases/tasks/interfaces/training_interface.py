@@ -6,10 +6,13 @@
 #
 
 import abc
+from typing import Optional
 
 from otx.api.entities.datasets import DatasetEntity
 from otx.api.entities.model import ModelEntity
+from otx.api.entities.model_template import TaskType
 from otx.api.entities.train_parameters import TrainParameters
+from otx.api.usecases.adapters.dataset_adapter import DatasetAdapter
 
 
 class ITrainingTask(metaclass=abc.ABCMeta):
@@ -58,4 +61,44 @@ class ITrainingTask(metaclass=abc.ABCMeta):
 
         If training is not running, do nothing.
         """
+        raise NotImplementedError
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_dataset_adapter(
+        task_type: TaskType,
+        train_data_roots: Optional[str] = None,
+        train_ann_files: Optional[str] = None,
+        val_data_roots: Optional[str] = None,
+        val_ann_files: Optional[str] = None,
+        test_data_roots: Optional[str] = None,
+        test_ann_files: Optional[str] = None,
+        unlabeled_data_roots: Optional[str] = None,
+        unlabeled_file_list: Optional[str] = None,
+    ) -> DatasetAdapter:
+        """Get dataset adapter corresponded to the task type.
+
+        Dataset adapter adapts DatasetEntity from local dataset files.
+
+        Args:
+            task_type (TaskType): type of the task
+            train_data_roots (Optional[str]): Path for training data
+            train_ann_files (Optional[str]): Path for training annotation file
+            val_data_roots (Optional[str]): Path for validation data
+            val_ann_files (Optional[str]): Path for validation annotation file
+            test_data_roots (Optional[str]): Path for test data
+            test_ann_files (Optional[str]): Path for test annotation file
+            unlabeled_data_roots (Optional[str]): Path for unlabeled data
+            unlabeled_file_list (Optional[str]): Path of unlabeled file list
+
+        Since all adapters can be used for training and validation,
+        the default value of train/val/test_data_roots was set to None.
+
+        i.e)
+        For the training/validation phase, test_data_roots is not used.
+        For the test phase, train_data_roots and val_data_root are not used.
+        """
+
+        # TODO: Move TrainType to otx.api and make it configurable here
+
         raise NotImplementedError

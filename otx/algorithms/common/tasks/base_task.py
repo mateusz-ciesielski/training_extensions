@@ -37,15 +37,19 @@ from otx.api.entities.inference_parameters import InferenceParameters
 from otx.api.entities.label import LabelEntity
 from otx.api.entities.metrics import MetricsGroup
 from otx.api.entities.model import ModelEntity, ModelFormat, ModelOptimizationType, ModelPrecision, OptimizationMethod
+from otx.api.entities.model_template import TaskType
 from otx.api.entities.resultset import ResultSetEntity
 from otx.api.entities.task_environment import TaskEnvironment
 from otx.api.entities.train_parameters import TrainParameters
 from otx.api.serialization.label_mapper import LabelSchemaMapper
+from otx.api.usecases.adapters.dataset_adapter import DatasetAdapter
 from otx.api.usecases.reporting.time_monitor_callback import TimeMonitorCallback
 from otx.api.usecases.tasks.interfaces.evaluate_interface import IEvaluationTask
 from otx.api.usecases.tasks.interfaces.export_interface import ExportType, IExportTask
 from otx.api.usecases.tasks.interfaces.inference_interface import IInferenceTask
+from otx.api.usecases.tasks.interfaces.training_interface import ITrainingTask
 from otx.api.usecases.tasks.interfaces.unload_interface import IUnload
+from otx.core.data.adapter import get_dataset_adapter
 
 TRAIN_TYPE_DIR_PATH = {
     TrainType.Incremental.name: ".",
@@ -91,7 +95,7 @@ class OnHookInitialized:
 
 
 # pylint: disable=too-many-instance-attributes
-class OTXTask(IInferenceTask, IExportTask, IEvaluationTask, IUnload, ABC):
+class OTXTask(IInferenceTask, ITrainingTask, IExportTask, IEvaluationTask, IUnload, ABC):
     """Base task of OTX."""
 
     def __init__(self, task_environment: TaskEnvironment, output_path: Optional[str] = None):
@@ -350,3 +354,54 @@ class OTXTask(IInferenceTask, IExportTask, IEvaluationTask, IUnload, ABC):
         output_model.has_xai = dump_features
         output_model.optimization_methods = self._optimization_methods
         output_model.precision = [precision]
+
+    @staticmethod
+    def get_dataset_adapter(
+        task_type: TaskType,
+        train_data_roots: Optional[str] = None,
+        train_ann_files: Optional[str] = None,
+        val_data_roots: Optional[str] = None,
+        val_ann_files: Optional[str] = None,
+        test_data_roots: Optional[str] = None,
+        test_ann_files: Optional[str] = None,
+        unlabeled_data_roots: Optional[str] = None,
+        unlabeled_file_list: Optional[str] = None,
+        **kwargs,
+    ) -> DatasetAdapter:
+        """Get dataset adapter corresponded to the task type.
+
+        Args:
+            task_type (TaskType): type of the task
+            train_data_roots (Optional[str]): Path for training data
+            train_ann_files (Optional[str]): Path for training annotation file
+            val_data_roots (Optional[str]): Path for validation data
+            val_ann_files (Optional[str]): Path for validation annotation file
+            test_data_roots (Optional[str]): Path for test data
+            test_ann_files (Optional[str]): Path for test annotation file
+            unlabeled_data_roots (Optional[str]): Path for unlabeled data
+            unlabeled_file_list (Optional[str]): Path of unlabeled file list
+            **kwargs: Additional keyword arguments
+
+        Since all adapters can be used for training and validation,
+        the default value of train/val/test_data_roots was set to None.
+
+        i.e)
+        For the training/validation phase, test_data_roots is not used.
+        For the test phase, train_data_roots and val_data_root are not used.
+        """
+
+        # TODO: Move TrainType to otx.api and make it configurable here
+
+        return get_dataset_adapter(
+            task_type=task_type,
+            train_type=TrainType.Incremental,
+            train_data_roots=train_data_roots,
+            train_ann_files=train_ann_files,
+            val_data_roots=val_data_roots,
+            val_ann_files=val_ann_files,
+            test_data_roots=test_data_roots,
+            test_ann_files=test_ann_files,
+            unlabeled_data_roots=unlabeled_data_roots,
+            unlabeled_file_list=unlabeled_file_list,
+            **kwargs,
+        )

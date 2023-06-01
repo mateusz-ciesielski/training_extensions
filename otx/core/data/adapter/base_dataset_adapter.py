@@ -6,9 +6,7 @@
 
 # pylint: disable=invalid-name, too-many-locals, too-many-instance-attributes, unused-argument, too-many-arguments
 
-import abc
 import os
-from abc import abstractmethod
 from copy import deepcopy
 from difflib import get_close_matches
 from typing import Any, Dict, List, Optional, Union
@@ -31,7 +29,6 @@ from otx.api.entities.annotation import (
     AnnotationSceneKind,
     NullAnnotationSceneEntity,
 )
-from otx.api.entities.datasets import DatasetEntity
 from otx.api.entities.id import ID
 from otx.api.entities.image import Image
 from otx.api.entities.label import LabelEntity
@@ -42,10 +39,11 @@ from otx.api.entities.scored_label import ScoredLabel
 from otx.api.entities.shapes.polygon import Point, Polygon
 from otx.api.entities.shapes.rectangle import Rectangle
 from otx.api.entities.subset import Subset
+from otx.api.usecases.adapters.dataset_adapter import DatasetAdapter
 from otx.core.data.caching.storage_cache import init_arrow_cache
 
 
-class BaseDatasetAdapter(metaclass=abc.ABCMeta):
+class BaseDatasetAdapter(DatasetAdapter):
     """Base dataset adapter for all of downstream tasks to use Datumaro.
 
     Mainly, BaseDatasetAdapter detect and import the dataset by using the function implemented in Datumaro.
@@ -197,11 +195,6 @@ class BaseDatasetAdapter(metaclass=abc.ABCMeta):
             if unlabeled_file_list is not None:
                 self._filter_unlabeled_data(dataset[Subset.UNLABELED], unlabeled_file_list)
         return dataset
-
-    @abstractmethod
-    def get_otx_dataset(self) -> DatasetEntity:
-        """Get DatasetEntity."""
-        raise NotImplementedError
 
     def get_label_schema(self) -> LabelSchemaEntity:
         """Get Label Schema."""
