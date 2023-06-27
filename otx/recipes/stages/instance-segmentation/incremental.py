@@ -19,7 +19,16 @@ optimizer_config = dict(_delete_=True)
 ignore = True
 adaptive_validation_interval = dict(
     max_interval=5,
-    enable_adaptive_interval_hook=True,
-    enable_eval_before_run=True,
+    enable_adaptive_interval_hook=False,
+    enable_eval_before_run=False,
 )
-adaptive_ema = dict(epoch_momentum=0.4)
+# adaptive_ema = dict(epoch_momentum=0.4)
+
+lr_config = dict(
+    _delete_=True,
+    policy='step',
+    warmup='linear',
+    warmup_iters=200,
+    warmup_ratio=0.001,
+    # [7] yields higher performance than [6]
+    step=[7])
