@@ -27,9 +27,9 @@ lr_config = dict(
     patience=8,
     iteration_patience=0,
     interval=1,
-    min_lr=0.000001,
+    min_lr=0.0001,
     warmup="linear",
-    warmup_iters=1000,
+    warmup_iters=300,
     warmup_ratio=1.0 / 3,
 )
 
@@ -38,7 +38,7 @@ evaluation = dict(interval=1, metric="mAP", classwise=True, save_best="mAP")
 custom_hooks = [
     dict(
         type="LazyEarlyStoppingHook",
-        start=3,
+        start=16,
         patience=20,
         iteration_patience=0,
         metric="mAP",
