@@ -386,11 +386,11 @@ class DetectionConfigurer:
                     **adaptive_ema,
                 ),
             )
-        else:
-            update_or_add_custom_hook(
-                cfg,
-                ConfigDict(type="EMAHook", priority="ABOVE_NORMAL", resume_from=cfg.get("resume_from"), momentum=0.1),
-            )
+        # else:
+        #     update_or_add_custom_hook(
+        #         cfg,
+        #         ConfigDict(type="EMAHook", priority="ABOVE_NORMAL", resume_from=cfg.get("resume_from"), momentum=0.1),
+        #     )
 
     @staticmethod
     def add_yolox_hooks(cfg):
@@ -709,6 +709,7 @@ class SemiSLDetectionConfigurer(DetectionConfigurer):
                 self.configure_anchor(cfg, train_dataset)
             if self.task_adapt_type == "mpa":
                 self.configure_bbox_head(cfg)
+                self.configure_ema(cfg)
             else:
                 src_data_cfg = self.get_data_cfg(cfg, "train")
                 src_data_cfg.pop("old_new_indices", None)
