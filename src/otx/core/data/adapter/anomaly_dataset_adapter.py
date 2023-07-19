@@ -214,7 +214,8 @@ class AnomalySegmentationDatasetAdapter(AnomalyBaseDatasetAdapter):
                         "ground_truth",
                         str(datumaro_item.id) + "_mask.png",
                     )
-                    if os.path.exists(mask_file_path):
+                    # if os.path.exists(mask_file_path):
+                    if False:
                         mask = (cv2.imread(mask_file_path, cv2.IMREAD_GRAYSCALE) / 255).astype(np.uint8)
                         shapes.extend(
                             create_annotation_from_segmentation_map(

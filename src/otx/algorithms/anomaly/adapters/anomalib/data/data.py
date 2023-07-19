@@ -16,9 +16,12 @@
 
 from typing import Dict, List, Optional, Union
 
+import albumentations as A
 import numpy as np
 import torch
+from albumentations.pytorch import ToTensorV2
 from anomalib.data.base.datamodule import collate_fn
+from anomalib.data.utils import Augmenter
 from anomalib.data.utils.transform import get_transforms
 from omegaconf import DictConfig, ListConfig
 from pytorch_lightning.core.datamodule import LightningDataModule
@@ -26,8 +29,10 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from otx.algorithms.anomaly.adapters.anomalib.logger import get_logger
+from otx.api.entities.annotation import Annotation, AnnotationSceneEntity
 from otx.api.entities.datasets import DatasetEntity
 from otx.api.entities.model_template import TaskType
+from otx.api.entities.scored_label import ScoredLabel
 from otx.api.entities.shapes.polygon import Polygon
 from otx.api.entities.shapes.rectangle import Rectangle
 from otx.api.entities.subset import Subset
@@ -35,7 +40,7 @@ from otx.api.utils.dataset_utils import (
     contains_anomalous_images,
     split_local_global_dataset,
 )
-from otx.api.utils.segmentation_utils import mask_from_dataset_item
+from otx.api.utils.segmentation_utils import create_annotation_from_segmentation_map, mask_from_dataset_item
 
 logger = get_logger(__name__)
 
@@ -133,6 +138,50 @@ class OTXAnomalyDataset(Dataset):
         else:
             item["label"] = 0
         return item
+
+
+class SyntheticOTXDataset(OTXAnomalyDataset):
+    """OTX anomaly dataset that applies random anomalous augmentations to 50% of the normal images."""
+
+    def __init__(
+        self, config: Union[DictConfig, ListConfig], dataset: DatasetEntity, task_type: TaskType, label_map: Dict
+    ) -> None:
+        super().__init__(config, dataset, task_type)
+
+        self.label_map = label_map
+        self.normal_label = [label for label in label_map.values() if not label.is_anomalous][0]
+        self.anomalous_label = [label for label in label_map.values() if label.is_anomalous][0]
+
+        self.generate_synthetic_anomalies()
+
+    def generate_synthetic_anomalies(self):
+        """Apply anomalous augmentations."""
+        augmenter = Augmenter(p_anomalous=0.5, beta=(0.01, 0.2))
+        transform = A.Compose([A.ToFloat(), ToTensorV2()])
+
+        for dataset_item in self.dataset:
+            if any(label.is_anomalous for label in dataset_item.get_shapes_labels()):
+                continue
+            # apply augmentations
+            image = transform(image=dataset_item.media.numpy)["image"]
+            aug_image, mask = augmenter.augment_batch(image.unsqueeze(0))
+            if mask.max() == 1:
+                # update media
+                dataset_item.media.numpy = (aug_image * 255).squeeze().permute(1, 2, 0).numpy().astype(np.uint8)
+                # update mask
+                local_annotation = create_annotation_from_segmentation_map(
+                    hard_prediction=mask.squeeze().numpy().astype(np.uint8),
+                    soft_prediction=np.ones(mask.shape[-2:]),
+                    label_map=self.label_map,
+                )
+                # dataset_item.append_annotations(annotations)
+                # update label
+                label = ScoredLabel(self.anomalous_label, probability=1.0)
+                global_annotation = Annotation(shape=Rectangle(0.0, 0.0, 1.0, 1.0), labels=[label])
+                annotation_scene = AnnotationSceneEntity(
+                    [global_annotation] + local_annotation, kind=dataset_item.annotation_scene.kind
+                )
+                dataset_item.annotation_scene = annotation_scene
 
 
 class OTXAnomalyDataModule(LightningDataModule):
@@ -235,9 +284,16 @@ class OTXAnomalyDataModule(LightningDataModule):
         if contains_anomalous_images(local_dataset):
             logger.info("Dataset contains polygon annotations. Passing masks to anomalib.")
             dataset = OTXAnomalyDataset(self.config, local_dataset, self.task_type)
+        elif self.task_type == TaskType.ANOMALY_CLASSIFICATION:
+            dataset = OTXAnomalyDataset(self.config, global_dataset, self.task_type)
         else:
             logger.info("Dataset does not contain polygon annotations. Not passing masks to anomalib.")
-            dataset = OTXAnomalyDataset(self.config, global_dataset, TaskType.ANOMALY_CLASSIFICATION)
+            # create label map
+            labels = self.dataset.get_labels()
+            self.normal_label = [label for label in labels if not label.is_anomalous][0]
+            self.anomalous_label = [label for label in labels if label.is_anomalous][0]
+            label_map = {0: self.normal_label, 1: self.anomalous_label}
+            dataset = SyntheticOTXDataset(self.config, local_dataset, self.task_type, label_map)
         return DataLoader(
             dataset,
             shuffle=False,
@@ -267,7 +323,11 @@ class OTXAnomalyDataModule(LightningDataModule):
         Returns:
             Union[DataLoader, List[DataLoader]]: Predict Dataloader.
         """
+        labels = self.dataset.get_labels()
+        self.normal_label = [label for label in labels if not label.is_anomalous][0]
+        self.anomalous_label = [label for label in labels if label.is_anomalous][0]
         dataset = OTXAnomalyDataset(self.config, self.predict_otx_dataset, self.task_type)
+        # dataset = SyntheticOTXDataset(self.config, self.predict_otx_dataset, self.task_type, label_map)
         return DataLoader(
             dataset,
             shuffle=False,
