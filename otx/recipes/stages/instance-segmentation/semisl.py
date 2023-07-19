@@ -22,10 +22,10 @@ custom_hooks = [
     dict(
         type="UnbiasedTeacherHook",
         epoch_momentum=0.0,
-        start_epoch=16
+        start_epoch=8
     )
 ]
 
-adaptive_ema = dict(epoch_momentum=0.4)
+adaptive_ema = dict(epoch_momentum=0.1)
 ignore = True
 find_unused_parameters = True
