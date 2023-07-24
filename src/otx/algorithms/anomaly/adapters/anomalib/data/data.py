@@ -323,11 +323,7 @@ class OTXAnomalyDataModule(LightningDataModule):
         Returns:
             Union[DataLoader, List[DataLoader]]: Predict Dataloader.
         """
-        labels = self.dataset.get_labels()
-        self.normal_label = [label for label in labels if not label.is_anomalous][0]
-        self.anomalous_label = [label for label in labels if label.is_anomalous][0]
         dataset = OTXAnomalyDataset(self.config, self.predict_otx_dataset, self.task_type)
-        # dataset = SyntheticOTXDataset(self.config, self.predict_otx_dataset, self.task_type, label_map)
         return DataLoader(
             dataset,
             shuffle=False,
