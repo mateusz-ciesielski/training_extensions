@@ -251,6 +251,16 @@ def otx_export_testing(template, root, dump_features=False, half_precision=False
         else:
             path_to_onnx = os.path.join(save_path, "model.onnx")
             assert os.path.exists(path_to_onnx)
+
+            if check_ir_meta:
+                onnx_model = onnx.load(path_to_onnx)
+                is_model_type_presented = False
+                for prop in onnx_model.metadata_props:
+                    assert "model_info" in prop.key
+                    if "model_type" in prop.key:
+                        is_model_type_presented = True
+                assert is_model_type_presented
+
             # In case of tile classifier mmdeploy inserts mark nodes in onnx, making it non-standard
             if not os.path.exists(os.path.join(save_path, "tile_classifier.onnx")):
                 onnx.checker.check_model(path_to_onnx)
@@ -504,7 +514,7 @@ def otx_demo_deployment_testing(template, root, otx_dir, args):
     assert os.path.exists(os.path.join(deployment_dir, "output"))
 
 
-def ptq_optimize_testing(template, root, otx_dir, args):
+def ptq_optimize_testing(template, root, otx_dir, args, is_visual_prompting=False):
     template_work_dir = get_template_dir(template, root)
     command_line = [
         "otx",
@@ -514,15 +524,38 @@ def ptq_optimize_testing(template, root, otx_dir, args):
         f'{os.path.join(otx_dir, args["--train-data-roots"])}',
         "--val-data-roots",
         f'{os.path.join(otx_dir, args["--val-data-roots"])}',
-        "--load-weights",
-        f"{template_work_dir}/exported_{template.model_template_id}/openvino.xml",
         "--output",
         f"{template_work_dir}/ptq_{template.model_template_id}",
     ]
+    if is_visual_prompting:
+        command_line.extend(
+            [
+                "--load-weights",
+                f"{template_work_dir}/exported_{template.model_template_id}/visual_prompting_decoder.xml",
+            ]
+        )
+    else:
+        command_line.extend(
+            [
+                "--load-weights",
+                f"{template_work_dir}/exported_{template.model_template_id}/openvino.xml",
+            ]
+        )
+
     command_line.extend(["--workspace", f"{template_work_dir}"])
     check_run(command_line)
-    assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/openvino.xml")
-    assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/openvino.bin")
+    if is_visual_prompting:
+        assert os.path.exists(
+            f"{template_work_dir}/ptq_{template.model_template_id}/visual_prompting_image_encoder.xml"
+        )
+        assert os.path.exists(
+            f"{template_work_dir}/ptq_{template.model_template_id}/visual_prompting_image_encoder.bin"
+        )
+        assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/visual_prompting_decoder.xml")
+        assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/visual_prompting_decoder.bin")
+    else:
+        assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/openvino.xml")
+        assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/openvino.bin")
     assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/label_schema.json")
 
 
@@ -543,14 +576,17 @@ def _validate_fq_in_xml(xml_path, path_to_ref_data, compression_type, test_name,
 
 def ptq_validate_fq_testing(template, root, otx_dir, task_type, test_name):
     template_work_dir = get_template_dir(template, root)
-    xml_path = f"{template_work_dir}/ptq_{template.model_template_id}/openvino.xml"
+    if task_type == "visual_prompting":
+        xml_path = f"{template_work_dir}/ptq_{template.model_template_id}/visual_prompting_image_encoder.xml"
+    else:
+        xml_path = f"{template_work_dir}/ptq_{template.model_template_id}/openvino.xml"
     path_to_ref_data = os.path.join(
         otx_dir, "tests", "e2e/cli", task_type, "reference", template.model_template_id, "compressed_model.yml"
     )
     _validate_fq_in_xml(xml_path, path_to_ref_data, "ptq", test_name)
 
 
-def ptq_eval_testing(template, root, otx_dir, args):
+def ptq_eval_testing(template, root, otx_dir, args, is_visual_prompting=False):
     template_work_dir = get_template_dir(template, root)
     command_line = [
         "otx",
@@ -563,6 +599,20 @@ def ptq_eval_testing(template, root, otx_dir, args):
         "--output",
         f"{template_work_dir}/ptq_{template.model_template_id}",
     ]
+    if is_visual_prompting:
+        command_line.extend(
+            [
+                "--load-weights",
+                f"{template_work_dir}/pot_{template.model_template_id}/visual_prompting_decoder.xml",
+            ]
+        )
+    else:
+        command_line.extend(
+            [
+                "--load-weights",
+                f"{template_work_dir}/pot_{template.model_template_id}/openvino.xml",
+            ]
+        )
     command_line.extend(["--workspace", f"{template_work_dir}"])
     check_run(command_line)
     assert os.path.exists(f"{template_work_dir}/ptq_{template.model_template_id}/performance.json")
