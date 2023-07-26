@@ -22,7 +22,8 @@ custom_hooks = [
     dict(
         type="UnbiasedTeacherHook",
         epoch_momentum=0.0,
-        start_epoch=8
+        start_epoch=8,
+        momentum=0.0004
     )
 ]
 
