@@ -30,7 +30,9 @@ from torch.utils.data import DataLoader, Dataset
 
 from otx.algorithms.anomaly.adapters.anomalib.logger import get_logger
 from otx.api.entities.annotation import Annotation, AnnotationSceneEntity
+from otx.api.entities.dataset_item import DatasetItemEntity
 from otx.api.entities.datasets import DatasetEntity
+from otx.api.entities.image import Image
 from otx.api.entities.model_template import TaskType
 from otx.api.entities.scored_label import ScoredLabel
 from otx.api.entities.shapes.polygon import Polygon
@@ -159,15 +161,23 @@ class SyntheticOTXDataset(OTXAnomalyDataset):
         augmenter = Augmenter(p_anomalous=0.5, beta=(0.01, 0.2))
         transform = A.Compose([A.ToFloat(), ToTensorV2()])
 
+        new_items = []
+
         for dataset_item in self.dataset:
+            original_image = dataset_item.media.numpy
             if any(label.is_anomalous for label in dataset_item.get_shapes_labels()):
+                new_dataset_item = DatasetItemEntity(
+                    media=Image(original_image),
+                    annotation_scene=dataset_item.annotation_scene,
+                    roi=dataset_item.roi,
+                    subset=Subset.VALIDATION,
+                )
                 continue
             # apply augmentations
             image = transform(image=dataset_item.media.numpy)["image"]
             aug_image, mask = augmenter.augment_batch(image.unsqueeze(0))
+            aug_image = (aug_image * 255).squeeze().permute(1, 2, 0).numpy().astype(np.uint8)
             if mask.max() == 1:
-                # update media
-                dataset_item.media.numpy = (aug_image * 255).squeeze().permute(1, 2, 0).numpy().astype(np.uint8)
                 # update mask
                 local_annotation = create_annotation_from_segmentation_map(
                     hard_prediction=mask.squeeze().numpy().astype(np.uint8),
@@ -182,6 +192,21 @@ class SyntheticOTXDataset(OTXAnomalyDataset):
                     [global_annotation] + local_annotation, kind=dataset_item.annotation_scene.kind
                 )
                 dataset_item.annotation_scene = annotation_scene
+                new_dataset_item = DatasetItemEntity(
+                    media=Image(aug_image),
+                    annotation_scene=annotation_scene,
+                    roi=dataset_item.roi,
+                    subset=Subset.VALIDATION,
+                )
+            else:
+                new_dataset_item = DatasetItemEntity(
+                    media=Image(original_image),
+                    annotation_scene=dataset_item.annotation_scene,
+                    roi=dataset_item.roi,
+                    subset=Subset.VALIDATION,
+                )
+            new_items.append(new_dataset_item)
+        self.dataset = DatasetEntity(items=new_items)
 
 
 class OTXAnomalyDataModule(LightningDataModule):
