@@ -29,7 +29,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from otx.algorithms.anomaly.adapters.anomalib.logger import get_logger
-from otx.api.entities.annotation import Annotation, AnnotationSceneEntity
+from otx.api.entities.annotation import Annotation, AnnotationSceneEntity, AnnotationSceneKind
 from otx.api.entities.dataset_item import DatasetItemEntity
 from otx.api.entities.datasets import DatasetEntity
 from otx.api.entities.image import Image
@@ -169,7 +169,7 @@ class SyntheticOTXDataset(OTXAnomalyDataset):
                 new_dataset_item = DatasetItemEntity(
                     media=Image(original_image),
                     annotation_scene=dataset_item.annotation_scene,
-                    roi=dataset_item.roi,
+                    # roi=dataset_item.roi,
                     subset=Subset.VALIDATION,
                 )
                 continue
@@ -189,20 +189,23 @@ class SyntheticOTXDataset(OTXAnomalyDataset):
                 label = ScoredLabel(self.anomalous_label, probability=1.0)
                 global_annotation = Annotation(shape=Rectangle(0.0, 0.0, 1.0, 1.0), labels=[label])
                 annotation_scene = AnnotationSceneEntity(
-                    [global_annotation] + local_annotation, kind=dataset_item.annotation_scene.kind
+                    [global_annotation] + local_annotation, kind=AnnotationSceneKind.ANNOTATION
                 )
                 dataset_item.annotation_scene = annotation_scene
                 new_dataset_item = DatasetItemEntity(
                     media=Image(aug_image),
                     annotation_scene=annotation_scene,
-                    roi=dataset_item.roi,
+                    # roi=dataset_item.roi,
                     subset=Subset.VALIDATION,
                 )
             else:
+                label = ScoredLabel(self.normal_label, probability=1.0)
+                global_annotation = Annotation(shape=Rectangle(0.0, 0.0, 1.0, 1.0), labels=[label])
+                annotation_scene = AnnotationSceneEntity([global_annotation], kind=AnnotationSceneKind.ANNOTATION)
                 new_dataset_item = DatasetItemEntity(
                     media=Image(original_image),
-                    annotation_scene=dataset_item.annotation_scene,
-                    roi=dataset_item.roi,
+                    annotation_scene=annotation_scene,
+                    # roi=dataset_item.roi,
                     subset=Subset.VALIDATION,
                 )
             new_items.append(new_dataset_item)
