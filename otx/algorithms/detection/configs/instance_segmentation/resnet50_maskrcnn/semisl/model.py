@@ -31,6 +31,9 @@ model = dict(
     unlabeled_reg_loss_weight=1.0,
     use_rpn_loss=True,
     unlabeled_memory_bank=True,
+    use_MSL=True,
+    use_teacher_proposal=True,
+    compute_mask_v2 = True,
     percentile=80,
     type="CustomMaskRCNN",
     neck=dict(
@@ -139,12 +142,21 @@ model = dict(
                 num=512,
                 pos_fraction=0.25,
                 neg_pos_ub=-1,
-                add_gt_as_proposals=True,
+                add_gt_as_proposals=False,
             ),
             mask_size=28,
             pos_weight=-1,
             debug=False,
         ),
+        pseudo_label_initial_score_thr=0.3,
+        rpn_pseudo_threshold=0.6,
+        cls_pseudo_threshold=0.6,
+        min_pseduo_box_size=0,
+        use_teacher_proposal=True,
+        use_MSL=True,
+        # ------ PLA config ------- #
+        PLA_iou_thres=0.4,
+        PLA_candidate_topk=12,
     ),
     test_cfg=dict(
         rpn=dict(
