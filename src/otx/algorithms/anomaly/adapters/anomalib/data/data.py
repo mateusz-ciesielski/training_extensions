@@ -99,6 +99,7 @@ class OTXAnomalyDataset(Dataset):
             Dict[str, Union[int, Tensor]]: Dataset item.
         """
         dataset_item = self.dataset[index]
+        logger.info(f"getitem dataset_item: {type(dataset_item)}")
         item: Dict[str, Union[int, Tensor]] = {}
         item = {"index": index}
         if self.task_type == TaskType.ANOMALY_CLASSIFICATION:
@@ -208,8 +209,12 @@ class SyntheticOTXDataset(OTXAnomalyDataset):
                     # roi=dataset_item.roi,
                     subset=Subset.VALIDATION,
                 )
+            logger.info(f"new_dataset_item: {type(new_dataset_item)}")
+            logger.info(f"new_dataset_item.media: {type(new_dataset_item.media)}")
             new_items.append(new_dataset_item)
+        logger.info(f"self.dataset old: {type(self.dataset)}")
         self.dataset = DatasetEntity(items=new_items)
+        logger.info(f"self.dataset new: {type(self.dataset)}")
 
 
 class OTXAnomalyDataModule(LightningDataModule):
