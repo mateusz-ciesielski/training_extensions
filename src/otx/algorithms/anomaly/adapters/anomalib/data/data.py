@@ -99,6 +99,7 @@ class OTXAnomalyDataset(Dataset):
             Dict[str, Union[int, Tensor]]: Dataset item.
         """
         dataset_item = self.dataset[index]
+        logger.info(f"dataset class: {type(self)}")
         logger.info(f"getitem dataset_item: {type(dataset_item)}")
         item: Dict[str, Union[int, Tensor]] = {}
         item = {"index": index}
