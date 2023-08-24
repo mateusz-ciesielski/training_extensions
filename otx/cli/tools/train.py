@@ -40,6 +40,7 @@ from otx.cli.utils.parser import (
     get_parser_and_hprams_data,
 )
 from otx.cli.utils.report import get_otx_report
+from otx.cli.utils.experiment import run_process_to_check_resource
 from otx.core.data.adapter import get_dataset_adapter
 
 
@@ -137,6 +138,10 @@ def get_args():
         type=str,
         default=None,
         help="The data.yaml path want to use in train task.",
+    )
+    parser.add_argument(
+        "--track-resource-usage",
+        action="store_true",
     )
 
     sub_parser = add_hyper_parameters_sub_parser(parser, hyper_parameters, return_sub_parser=True)
@@ -242,6 +247,9 @@ def train(exit_stack: Optional[ExitStack] = None):  # pylint: disable=too-many-b
                     "Warning: due to abstract of ExitStack context, "
                     "if main process raises an error, all processes can be stuck."
                 )
+
+    if args.track_resource_usage:
+        run_process_to_check_resource(config_manager.output_path, exit_stack)
 
     task = task_class(task_environment=environment, output_path=str(config_manager.output_path / "logs"))
 
