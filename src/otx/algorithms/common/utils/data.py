@@ -194,8 +194,8 @@ def get_image(results: Dict[str, Any], cache_dir: str, to_float32=False) -> np.n
     if to_float32:
         img = img.astype(np.float32)
 
-    if is_training_video_frame(subset, media):
-        save_image_to_cache(img, filename)
+    #if is_training_video_frame(subset, media):
+    #    save_image_to_cache(img, filename)
 
     return img
 
