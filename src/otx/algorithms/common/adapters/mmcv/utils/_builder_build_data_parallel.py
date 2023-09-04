@@ -74,6 +74,13 @@ def build_data_parallel(
         else:
             model = model.cuda(config.gpu_ids[0])
             model = MMDataParallel(model, device_ids=config.gpu_ids)
+    # FIXME: temporary change to enable & test XPU inferene
+    # Below condition does not work due to some reason
+    #elif cfg.device == "xpu":
+    elif True:
+        from otx.algorithms.classification.adapters.mmcls.apis.train import XPUDataParallel
+        assert len(config.gpu_ids) == 1
+        model = XPUDataParallel(model.xpu(), dim=0, device_ids=config.gpu_ids)
     else:
         # temporarily disable cuda for cpu data parallel
         bak = torch.cuda.is_available

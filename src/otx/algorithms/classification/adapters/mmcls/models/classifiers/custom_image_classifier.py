@@ -86,6 +86,11 @@ class CustomImageClassifier(SAMClassifierMixin, ClsLossDynamicsTrackingMixin, Im
 
         return losses
 
+    # FIXME: temporary change to enable & test XPU inferene
+    def simple_test(self, img, img_metas=None, **kwargs):
+        img = img.to("xpu")
+        return super().simple_test(img, img_metas, **kwargs)
+
     @staticmethod
     def state_dict_hook(module, state_dict, prefix, *args, **kwargs):  # noqa: C901
         # pylint: disable=unused-argument, too-many-branches
