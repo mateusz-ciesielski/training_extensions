@@ -29,14 +29,14 @@ args = {
     "--train-data-roots": "tests/assets/cvat_dataset/action_classification/train",
     "--val-data-roots": "tests/assets/cvat_dataset/action_classification/train",
     "--test-data-roots": "tests/assets/cvat_dataset/action_classification/train",
-    "train_params": ["params", "--learning_parameters.num_iters", "4", "--learning_parameters.batch_size", "4"],
+    "train_params": ["params", "--learning_parameters.num_iters", "8", "--learning_parameters.batch_size", "4"],
 }
 
 # Training params for resume, num_iters*2
 resume_params = [
     "params",
     "--learning_parameters.num_iters",
-    "6",
+    "10",
     "--learning_parameters.batch_size",
     "4",
 ]
