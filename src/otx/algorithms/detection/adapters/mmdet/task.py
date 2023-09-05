@@ -1,18 +1,6 @@
 """Task of OTX Detection using mmdetection training backend."""
-
 # Copyright (C) 2023 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions
-# and limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 import glob
 import io
@@ -27,7 +15,7 @@ import torch
 from mmcv.runner import wrap_fp16_model
 from mmcv.utils import Config, ConfigDict, get_git_hash
 from mmdet import __version__
-from mmdet.apis import single_gpu_test, train_detector
+from mmdet.apis import single_gpu_test
 from mmdet.datasets import build_dataloader, build_dataset, replace_ImageToTensor
 from mmdet.models.detectors import DETR, TwoStageDetector
 from mmdet.utils import collect_env
@@ -60,6 +48,7 @@ from otx.algorithms.detection.adapters.mmdet.configurer import (
     IncrDetectionConfigurer,
     SemiSLDetectionConfigurer,
 )
+from otx.algorithms.detection.adapters.mmdet.apis.train import train_detector
 from otx.algorithms.detection.adapters.mmdet.datasets import ImageTilingDataset
 from otx.algorithms.detection.adapters.mmdet.hooks.det_class_probability_map_hook import (
     DetClassProbabilityMapHook,
@@ -246,7 +235,7 @@ class MMDetectionTask(OTXDetectionTask):
         timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
 
         # Environment
-        logger.info(f"cfg.gpu_ids = {cfg.gpu_ids}, distributed = {cfg.distributed}")
+        logger.info(f"{cfg.device = }, {cfg.gpu_ids = }, {cfg.distributed = }")
         env_info_dict = collect_env()
         env_info = "\n".join([(f"{k}: {v}") for k, v in env_info_dict.items()])
         dash_line = "-" * 60 + "\n"

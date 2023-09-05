@@ -73,14 +73,16 @@ class CustomATSS(SAMDetectorMixin, DetLossDynamicsTrackingMixin, L2SPDetectorMix
                 continue
 
             # Mix weights
-            model_param = model_dict[model_name].clone()
+            model_param = model_dict[model_name]
+            model_device = model_param.device
+            model_param = model_param.to("cpu").clone()
             chkpt_param = chkpt_dict[chkpt_name]
             for model_t, ckpt_t in enumerate(model2chkpt):
                 if ckpt_t >= 0:
                     model_param[model_t].copy_(chkpt_param[ckpt_t])
 
             # Replace checkpoint weight by mixed weights
-            chkpt_dict[chkpt_name] = model_param
+            chkpt_dict[chkpt_name] = model_param.to(model_device)
 
 
 if is_mmdeploy_enabled():
