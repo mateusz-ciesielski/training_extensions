@@ -371,7 +371,7 @@ class MMClassificationTask(OTXClassificationTask):
         timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
 
         # Environment
-        logger.info(f"cfg.gpu_ids = {cfg.gpu_ids}, distributed = {cfg.distributed}")
+        logger.info(f"{cfg.device = }, {cfg.gpu_ids = }, {cfg.distributed = }")
         env_info_dict = collect_env()
         env_info = "\n".join([(f"{k}: {v}") for k, v in env_info_dict.items()])
         dash_line = "-" * 60 + "\n"

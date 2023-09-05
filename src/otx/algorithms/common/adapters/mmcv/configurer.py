@@ -81,6 +81,8 @@ class BaseConfigurer:
                 import intel_extension_for_pytorch as ipex
                 if is_xpu_available():
                     cfg.device = "xpu"
+                else:
+                    cfg.device = "cpu"
             except:
                 cfg.device = "cpu"
                 cfg.gpu_ids = range(-1, 0)
