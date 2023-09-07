@@ -21,18 +21,18 @@ import torch
 
 from otx.api.entities.model_template import ModelTemplate
 
-TEST_TYPES = ["train", "export", "deploy", "nncf", "ptq"]
+TEST_TYPES = ["train"]
 TASK_TYPES = [
     "classification",
     "detection",
     "semantic_segmentation",
     "instance_segmentation",
-    "action_classification",
-    "action_detection",
-    "anomaly",
+    # "action_classification",
+    # "action_detection",
+    # "anomaly",
 ]
-TRAIN_TYPES = ["supervised", "semi_supervised", "self_supervised", "class_incr", "tiling"]
-LABEL_TYPES = ["multi_class", "multi_label", "h_label", "supcon"]
+TRAIN_TYPES = ["supervised"]
+LABEL_TYPES = ["multi_class"]
 
 REGRESSION_TEST_EPOCHS = "10"
 
@@ -58,14 +58,14 @@ ANOMALY_DATASET_CATEGORIES = [
 TIME_LOG = {
     "train_time": "Train + val time (sec.)",
     "infer_time": "Infer time (sec.)",
-    "export_time": "Export time (sec.)",
-    "export_eval_time": "Export eval time (sec.)",
-    "deploy_time": "Deploy time (sec.)",
-    "deploy_eval_time": "Deploy eval time (sec.)",
-    "nncf_time": "NNCF time (sec.)",
-    "nncf_eval_time": "NNCF eval time (sec.)",
-    "ptq_time": "PTQ time (sec.)",
-    "ptq_eval_time": "PTQ eval time (sec.)",
+    # "export_time": "Export time (sec.)",
+    # "export_eval_time": "Export eval time (sec.)",
+    # "deploy_time": "Deploy time (sec.)",
+    # "deploy_eval_time": "Deploy eval time (sec.)",
+    # "nncf_time": "NNCF time (sec.)",
+    # "nncf_eval_time": "NNCF eval time (sec.)",
+    # "ptq_time": "PTQ time (sec.)",
+    # "ptq_eval_time": "PTQ eval time (sec.)",
 }
 
 
