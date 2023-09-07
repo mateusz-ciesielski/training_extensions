@@ -2,9 +2,8 @@ import warnings
 
 import torch
 
-from mmdet.core.bbox.assigners import ATSSAssigner
+from mmdet.core.bbox.assigners import ATSSAssigner, AssignResult
 from mmdet.core.bbox.builder import BBOX_ASSIGNERS
-from mmdet.core.bbox.assign_result import AssignResult
 
 
 @BBOX_ASSIGNERS.register_module()
