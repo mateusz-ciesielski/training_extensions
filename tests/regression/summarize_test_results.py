@@ -5,11 +5,34 @@ from typing import Dict, Union, List, Any
 
 import pandas as pd
 
-from tests.regression.regression_test_helpers import (
-    ANOMALY_DATASET_CATEGORIES,
-    LABEL_TYPES,
-    TRAIN_TYPES,
-)
+#from tests.regression.regression_test_helpers import (
+#    ANOMALY_DATASET_CATEGORIES,
+#    LABEL_TYPES,
+#    TRAIN_TYPES,
+#)
+
+
+TRAIN_TYPES = ["supervised"]
+LABEL_TYPES = ["multi_class"]
+
+
+ANOMALY_DATASET_CATEGORIES = [
+    "bottle",
+    "cable",
+    "capsule",
+    "carpet",
+    "grid",
+    "hazelnut",
+    "leather",
+    "metal_nut",
+    "pill",
+    "screw",
+    "tile",
+    "toothbrush",
+    "transistor",
+    "wood",
+    "zipper",
+]
 
 
 ANOMALY_DATA = {
@@ -230,3 +253,10 @@ def summarize_results_data(input_path: str, output_path: str):
             else:
                 summarize_non_anomaly_data(task, task_key, json_data, NON_ANOMALY_DATA)
                 save_file(NON_ANOMALY_DATA, output_path, f"tests-reg_{task}_{task_key}.csv")
+
+
+def main():
+    summarize_results_data("/tmp/regression_test_results/", "./reg_results")
+
+if __name__ == "__main__":
+    main()
