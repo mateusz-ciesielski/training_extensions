@@ -143,6 +143,9 @@ class TimeMonitorCallback(Callback):
         """Compute average time taken to complete a step based on a running average of `step_history` steps."""
         self.__calculate_average_step()
 
+        #if logs is not None:
+        print(f"\nAverage GPU test batch time: {self.average_step}")
+
     def on_train_begin(self, logs=None):
         """Sets training to true."""
         self.is_training = True
