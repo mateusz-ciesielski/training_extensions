@@ -14,7 +14,7 @@ model = dict(
         version="b0",
     ),
     head=dict(
-        type="CustomLinearClsHead",
+        type="LinearEnsembleClsHead",
         loss=dict(
             type="CrossEntropyLoss",
             loss_weight=1.0,
