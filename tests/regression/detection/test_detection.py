@@ -91,6 +91,8 @@ class TestRegressionDetection:
 
         self.performance[template.name][TIME_LOG["train_time"]] = round(train_elapsed_time, 3)
         self.performance[template.name][TIME_LOG["infer_time"]] = round(infer_elapsed_time, 3)
+        self.performance[template.name]["raw_gpu_time"] = round(test_result["raw"]["eval_total_gpu_time"], 3)
+        self.performance[template.name]["raw_avg_gpu_time"] = round(test_result["raw"]["eval_avg_gpu_time"], 3)
         reg_cfg.result_dict[reg_cfg.task_type][reg_cfg.label_type][reg_cfg.train_type]["train"].append(self.performance)
 
         assert test_result["passed"] is True, test_result["log"]

@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from tests.test_suite.run_test_command import (
     get_template_dir,
@@ -36,7 +37,14 @@ def regression_eval_testing(
     ]
     command_line.extend(["--workspace", f"{template_work_dir}"])
     command_line.extend(args.get("eval_params", []))
-    check_run(command_line)
+    stdout = check_run(command_line)
+    stdout = ''.join(stdout)
+    matched_val_times = re.findall('test batch time: \d+.\d+', stdout)
+    total_gpu_time = 0
+    for t_line in matched_val_times:
+        time = float(t_line.split(':')[1].strip())
+        total_gpu_time += time
+    print(total_gpu_time)
 
     performance_json_path = f"{template_work_dir}/trained_{template.model_template_id}/performance.json"
     assert os.path.exists(performance_json_path)
@@ -51,13 +59,15 @@ def regression_eval_testing(
         if trained_performance[k] < modified_criteria:
             regression_result["passed"] = False
             regression_result["log"] = f"Performance: ({trained_performance[k]}) < Criteria: ({modified_criteria})."
-            regression_result["raw"] = {
-                "metric": k,
-                "performance": trained_performance[k],
-                "template": template.name,
-                "criteria": model_criteria,
-                "threshold": threshold,
-            }
+        regression_result["raw"] = {
+            "metric": k,
+            "performance": trained_performance[k],
+            "template": template.name,
+            "criteria": model_criteria,
+            "threshold": threshold,
+            "total_gpu_time": total_gpu_time,
+            "avg_gpu_time": total_gpu_time / len(matched_val_times),
+        }
 
     result_dict["Model size (MB)"] = round(
         os.path.getsize(f"{template_work_dir}/trained_{template.model_template_id}/models/weights.pth") / 1e6, 2

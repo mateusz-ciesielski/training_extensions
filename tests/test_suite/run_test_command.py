@@ -97,7 +97,7 @@ def runner(
 
 
 def check_run(cmd, **kwargs):
-    rc, _, stderr = runner(cmd, **kwargs)
+    rc, stdout, stderr = runner(cmd, **kwargs)
     sys.stdout.flush()
     sys.stderr.flush()
 
@@ -108,7 +108,9 @@ def check_run(cmd, **kwargs):
             if line.startswith("Traceback"):
                 break
         stderr = "\n".join(stderr[i:])
-    assert rc == 0, stderr
+    stdout = stdout.decode("utf-8").splitlines()
+    assert rc == 0, stdout
+    return stdout
 
 
 def otx_train_testing(template, root, otx_dir, args, deterministic=True):
@@ -139,9 +141,10 @@ def otx_train_testing(template, root, otx_dir, args, deterministic=True):
         command_line.extend(["--deterministic"])
     if "train_params" in args:
         command_line.extend(args["train_params"])
-    check_run(command_line)
+    stdout = check_run(command_line)
     assert os.path.exists(f"{template_work_dir}/trained_{template.model_template_id}/models/weights.pth")
     assert os.path.exists(f"{template_work_dir}/trained_{template.model_template_id}/models/label_schema.json")
+    return stdout
 
 
 def otx_resume_testing(template, root, otx_dir, args):
