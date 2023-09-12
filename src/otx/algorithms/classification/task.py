@@ -26,7 +26,7 @@ from otx.algorithms.common.configs import TrainType
 from otx.algorithms.common.configs.configuration_enums import InputSizePreset
 from otx.algorithms.common.tasks.base_task import TRAIN_TYPE_DIR_PATH, OTXTask
 from otx.algorithms.common.utils import embed_ir_model_data
-from otx.algorithms.common.utils.callback import TrainingProgressCallback
+from otx.algorithms.common.utils.callback import InferenceProgressCallback, TrainingProgressCallback
 from otx.algorithms.common.utils.logger import get_logger
 from otx.algorithms.common.utils.utils import embed_onnx_model_data
 from otx.api.configuration import cfg_helper
@@ -160,20 +160,23 @@ class OTXClassificationTask(OTXTask, ABC):
 
         logger.info("infer()")
 
+        update_progress_callback = default_infer_progress_callback
+        process_saliency_maps = False
+        explain_predicted_classes = True
+
+        if inference_parameters is not None:
+            update_progress_callback = inference_parameters.update_progress  # type: ignore
+            process_saliency_maps = inference_parameters.process_saliency_maps
+            explain_predicted_classes = inference_parameters.explain_predicted_classes
+
+        self._time_monitor = InferenceProgressCallback(len(dataset), update_progress_callback)
+
         results = self._infer_model(dataset, inference_parameters)
         prediction_results = zip(
             results["eval_predictions"],
             results["feature_vectors"],
             results["saliency_maps"],
         )
-
-        update_progress_callback = default_infer_progress_callback
-        process_saliency_maps = False
-        explain_predicted_classes = True
-        if inference_parameters is not None:
-            update_progress_callback = inference_parameters.update_progress  # type: ignore
-            process_saliency_maps = inference_parameters.process_saliency_maps
-            explain_predicted_classes = inference_parameters.explain_predicted_classes
 
         self._add_predictions_to_dataset(
             prediction_results, dataset, update_progress_callback, process_saliency_maps, explain_predicted_classes
