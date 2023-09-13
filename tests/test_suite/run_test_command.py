@@ -102,6 +102,7 @@ def check_run(cmd, **kwargs):
     sys.stdout.flush()
     sys.stderr.flush()
 
+    stdout = stdout.decode("utf-8").splitlines() + stderr.decode("utf-8").splitlines()
     if rc != 0:
         stderr = stderr.decode("utf-8").splitlines()
         i = 0
@@ -109,7 +110,6 @@ def check_run(cmd, **kwargs):
             if line.startswith("Traceback"):
                 break
         stderr = "\n".join(stderr[i:])
-    stdout = stdout.decode("utf-8").splitlines()
     assert rc == 0, stdout
     return stdout
 
