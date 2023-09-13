@@ -72,6 +72,10 @@ NON_ANOMALY_DATA = {
     #"nncf E2E Time (Sec.)": [],
     #"ptq E2E Time (Sec.)": [],
     "train Eval Time (Sec.)": [],
+    "train gpu total time (Sec.)": [],
+    "train gpu batch avg time (Sec.)": [],
+    "eval gpu total time (Sec.)": [],
+    "eval gpu batch avg time (Sec.)": [],
     #"export Eval Time (Sec.)": [],
     #"deploy Eval Time (Sec.)": [],
     #"nncf Eval Time (Sec.)": [],
@@ -143,12 +147,30 @@ def fill_model_performance(items: Union[list, str], test_type: str, result_data:
     """Fill the result_data by checking the index of data."""
     if isinstance(items, list):
         result_data[test_type].append(f"{items[0][0]}: {items[0][1]}")
+
+        def add_to_dict(data, k, v):
+            if k not in data:
+                data[k] = [v]
+            else:
+                data[k].append(v)
+
         if test_type == "train":
             result_data[f"{test_type} E2E Time (Sec.)"].append(f"{items[2][1]}")
             result_data[f"{test_type} Eval Time (Sec.)"].append(f"{items[3][1]}")
+
+            add_to_dict(result_data, f"{test_type} Train GPU Total Time (Sec.)", f"{items[6][1]}")
+            add_to_dict(result_data, f"{test_type} Train AVG GPU Time (Sec.)", f"{items[7][1]}")
+            add_to_dict(result_data, f"{test_type} Eval GPU Total Time (Sec.)", f"{items[4][1]}")
+            add_to_dict(result_data, f"{test_type} Eval AVG GPU Time (Sec.)", f"{items[5][1]}")
         else:
             result_data[f"{test_type} E2E Time (Sec.)"].append(f"{items[1][1]}")
             result_data[f"{test_type} Eval Time (Sec.)"].append(f"{items[2][1]}")
+
+        keys_to_del = []
+        for k in result_data:
+            if not result_data[k]:
+                keys_to_del.append(k)
+        [result_data.pop(k) for k in keys_to_del]
     else:
         result_data[test_type].append(items)
         result_data[f"{test_type} E2E Time (Sec.)"].append(items)
