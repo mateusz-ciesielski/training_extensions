@@ -14,6 +14,7 @@
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
@@ -207,3 +208,20 @@ class RegressionTestConfig(object):
         if performance is None:
             raise ValueError("Performance is None.")
         return performance
+
+
+def get_train_gpu_time(log_str):
+    matched_data_times = re.findall(', data_time: \d+.\d+', log_str)
+    matched_full_times = re.findall(', time: \d+.\d+', log_str)
+
+    assert len(matched_data_times) == len(matched_full_times)
+    total_gpu_time = 0
+
+    for i, data_time in enumerate(matched_data_times):
+        data_time = float(data_time.split(':')[1].strip())
+        full_time = float(matched_full_times[i].split(':')[1].strip())
+        iter_time = full_time - data_time
+        assert iter_time >= 0
+        total_gpu_time += iter_time
+
+    return total_gpu_time / len(matched_data_times), total_gpu_time

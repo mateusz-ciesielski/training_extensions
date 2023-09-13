@@ -44,7 +44,6 @@ def regression_eval_testing(
     for t_line in matched_val_times:
         time = float(t_line.split(':')[1].strip())
         total_gpu_time += time
-    print(total_gpu_time)
 
     performance_json_path = f"{template_work_dir}/trained_{template.model_template_id}/performance.json"
     assert os.path.exists(performance_json_path)
