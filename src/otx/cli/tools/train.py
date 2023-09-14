@@ -29,6 +29,7 @@ from otx.api.serialization.label_mapper import label_schema_to_bytes
 from otx.api.usecases.adapters.model_adapter import ModelAdapter
 from otx.cli.manager import ConfigManager
 from otx.cli.manager.config_manager import TASK_TYPE_TO_SUB_DIR_NAME
+from otx.cli.utils.experiment import ResourceTracker
 from otx.cli.utils.hpo import run_hpo
 from otx.cli.utils.importing import get_impl_class
 from otx.cli.utils.io import read_binary, read_label_schema, save_model_data
@@ -39,7 +40,6 @@ from otx.cli.utils.parser import (
     get_parser_and_hprams_data,
 )
 from otx.cli.utils.report import get_otx_report
-from otx.cli.utils.experiment import run_process_to_check_resource
 from otx.core.data.adapter import get_dataset_adapter
 
 
@@ -159,7 +159,11 @@ def get_args():
     )
     parser.add_argument(
         "--track-resource-usage",
-        action="store_true",
+        type=str,
+        default=None,
+        help="Track resources utilization and max memory usage and save values at the output path. "
+        "The possible options are 'cpu', 'gpu' or you can set to a comma-separated list of resource types. "
+        "And 'all' is also available for choosing all resource types.",
     )
 
     sub_parser = add_hyper_parameters_sub_parser(parser, hyper_parameters, return_sub_parser=True)
@@ -264,16 +268,21 @@ def train(exit_stack: Optional[ExitStack] = None):  # pylint: disable=too-many-b
                     "if main process raises an error, all processes can be stuck."
                 )
 
-    if args.track_resource_usage:
-        run_process_to_check_resource(config_manager.output_path, exit_stack)
-
     task = task_class(task_environment=environment, output_path=str(config_manager.output_path / "logs"))
 
     output_model = ModelEntity(dataset, environment.get_model_configuration())
 
+    resource_tracker = None
+    if args.track_resource_usage and not is_multigpu_child_process():
+        resource_tracker = ResourceTracker(args.track_resource_usage, args.gpus)
+        resource_tracker.start()
+
     task.train(
         dataset, output_model, train_parameters=TrainParameters(), seed=args.seed, deterministic=args.deterministic
     )
+
+    if resource_tracker is not None:
+        resource_tracker.stop(config_manager.output_path / "resource_usage.yaml")
 
     model_path = config_manager.output_path / "models"
     save_model_data(output_model, str(model_path))
