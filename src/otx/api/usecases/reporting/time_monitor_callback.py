@@ -107,6 +107,7 @@ class TimeMonitorCallback(Callback):
     def on_train_batch_end(self, batch, logs=None):
         """Compute average time taken to complete a step."""
         self.__calculate_average_step()
+        print(f"\nAverage GPU train batch time: {self.average_step}")
 
     def is_stalling(self) -> bool:
         """Returns True if the training is stalling.
