@@ -83,7 +83,7 @@ class RegressionTestConfig(object):
         result_dir_prefix = kwargs.get("result_dir", "")
         if len(result_dir_prefix) > 0:
             result_dir_prefix = result_dir_prefix + "_"
-        self.result_dir = f"/tmp/regression_test_results/{result_dir_prefix}{task_type}"
+        self.result_dir = f"./regression_output/{result_dir_prefix}{task_type}"
         Path(self.result_dir).mkdir(parents=True, exist_ok=True)
 
         self.config_dict = self.load_config()
@@ -213,7 +213,6 @@ class RegressionTestConfig(object):
 def get_train_gpu_time(log_str):
     matched_data_times = re.findall(', data_time: \d+.\d+', log_str)
     matched_full_times = re.findall(', time: \d+.\d+', log_str)
-
     assert len(matched_data_times) == len(matched_full_times)
     total_gpu_time = 0
 

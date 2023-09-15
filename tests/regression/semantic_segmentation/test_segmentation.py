@@ -91,7 +91,8 @@ class TestRegressionSegmentation:
             self.performance[template.name],
         )
         infer_elapsed_time = timer() - infer_start_time
-
+        with open("test_logs_segmentation.txt", 'a') as f:
+            f.write(f'{template.name}: {train_elapsed_time / 60}')
         self.performance[template.name][TIME_LOG["train_time"]] = round(train_elapsed_time, 3)
         self.performance[template.name][TIME_LOG["infer_time"]] = round(infer_elapsed_time, 3)
         self.performance[template.name]["raw_gpu_time"] = round(test_result["raw"]["eval_total_gpu_time"], 3)

@@ -79,6 +79,9 @@ class TestRegressionMultiClassClassification:
         train_start_time = timer()
         train_output = otx_train_testing(template, tmp_dir_path, reg_cfg.otx_dir, reg_cfg.args)
         train_elapsed_time = timer() - train_start_time
+        with open("test_logs_classification.txt", 'a') as f:
+            f.write(f'{template.name}: {train_elapsed_time / 60}')
+
         avg_train_time, total_train_time = get_train_gpu_time(''.join(train_output))
 
         infer_start_time = timer()
@@ -91,7 +94,6 @@ class TestRegressionMultiClassClassification:
             self.performance[template.name],
         )
         infer_elapsed_time = timer() - infer_start_time
-
         self.performance[template.name][TIME_LOG["train_time"]] = round(train_elapsed_time, 3)
         self.performance[template.name][TIME_LOG["infer_time"]] = round(infer_elapsed_time, 3)
         self.performance[template.name]["raw_gpu_time"] = round(test_result["raw"]["eval_total_gpu_time"], 3)
