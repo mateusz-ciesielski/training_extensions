@@ -3,9 +3,9 @@
     "classification": {
       "supervised": {
         "multi_class": {
-          "--train-data-roots": "/data/otx/regression/cifar10_subset_cls_decr/train",
-          "--val-data-roots": "/data/otx/regression/cifar10_subset_cls_decr/test",
-          "--test-data-roots": "/data/otx/regression/cifar10_subset_cls_decr/test",
+          "--train-data-roots": "/data/otx/regression/bench_datasets/cars/train",
+          "--val-data-roots": "/data/otx/regression/bench_datasets/cars/test",
+          "--test-data-roots": "/data/otx/regression/bench_datasets/cars/test",
           "--input": "/data/otx/regression/cifar10_subset/test/airplane"
         }
       }
@@ -13,9 +13,9 @@
     "detection": {
       "supervised": {
         "multi_class": {
-          "--train-data-roots": "/data/otx/regression/coco_subset_cls_decr",
-          "--val-data-roots": "/data/otx/regression/coco_subset_cls_decr",
-          "--test-data-roots": "/data/otx/regression/coco_subset_cls_decr",
+          "--train-data-roots": "/data/otx/regression/bench_datasets/pascal_tiny/coco_otx",
+          "--val-data-roots": "/data/otx/regression/bench_datasets/pascal_tiny/coco_otx",
+          "--test-data-roots": "/data/otx/regression/bench_datasets/pascal_tiny/coco_otx",
           "--input": "/data/otx/regression/coco_subset_cls_decr/images/test"
         }
       }
@@ -23,9 +23,9 @@
     "segmentation": {
       "supervised": {
         "multi_class": {
-          "--train-data-roots": "/data/otx/regression/regression_voc_cls_decr/train",
-          "--val-data-roots": "/data/otx/regression/regression_voc_cls_decr/val",
-          "--test-data-roots": "/data/otx/regression/regression_voc_cls_decr/test",
+          "--train-data-roots": "/data/otx/regression/bench_datasets/kitti_full/train_set",
+          "--val-data-roots": "/data/otx/regression/bench_datasets/kitti_full/val_set",
+          "--test-data-roots": "/data/otx/regression/bench_datasets/kitti_full/val_set",
           "--input": "/data/otx/regression/regression_voc_cls_decr/test/images"
         }
       }
@@ -33,9 +33,9 @@
     "instance_segmentation": {
       "supervised": {
         "multi_class": {
-          "--train-data-roots": "/data/otx/regression/coco_subset_cls_decr",
-          "--val-data-roots": "/data/otx/regression/coco_subset_cls_decr",
-          "--test-data-roots": "/data/otx/regression/coco_subset_cls_decr",
+          "--train-data-roots": "/data/otx/regression/bench_datasets/pascal_tiny/coco_otx",
+          "--val-data-roots": "/data/otx/regression/bench_datasets/pascal_tiny/coco_otx",
+          "--test-data-roots": "/data/otx/regression/bench_datasets/pascal_tiny/coco_otx",
           "--input": "/data/otx/regression/coco_subset_cls_decr/images/test"
         }
       }
