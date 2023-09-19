@@ -190,6 +190,11 @@ class ClassificationOpenVINOTask(IDeploymentTask, IInferenceTask, IEvaluationTas
         self.hparams = self.task_environment.get_hyper_parameters(ClassificationConfig)
         self.model = self.task_environment.model
         self.inferencer = self.load_inferencer()
+        self._avg_time_per_image = None
+
+    @property
+    def avg_time_per_image(self):
+        return self._avg_time_per_image
 
     def load_inferencer(self) -> ClassificationOpenVINOInferencer:
         """load_inferencer function of ClassificationOpenVINOTask."""
@@ -279,7 +284,8 @@ class ClassificationOpenVINOTask(IDeploymentTask, IInferenceTask, IEvaluationTas
 
         self.inferencer.await_all()
 
-        logger.info(f"Avg time per image: {total_time/len(dataset)} secs")
+        self._avg_time_per_image = total_time / len(dataset)
+        logger.info(f"Avg time per image: {self._avg_time_per_image} secs")
         logger.info(f"Total time: {total_time} secs")
         logger.info("Classification OpenVINO inference completed")
 
