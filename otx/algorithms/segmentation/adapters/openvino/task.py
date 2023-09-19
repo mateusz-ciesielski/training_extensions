@@ -18,6 +18,7 @@ import io
 import json
 import os
 import tempfile
+import time
 from typing import Any, Dict, Optional, Tuple, Union
 from zipfile import ZipFile
 
@@ -168,6 +169,7 @@ class OpenVINOSegmentationTask(IDeploymentTask, IInferenceTask, IEvaluationTask,
         self.model = self.task_environment.model
         self.model_name = self.task_environment.model_template.model_template_id
         self.inferencer = self.load_inferencer()
+        self._avg_time_per_image = None
 
         labels = task_environment.get_labels(include_empty=False)
         self._label_dictionary = dict(enumerate(labels, 1))
@@ -178,6 +180,10 @@ class OpenVINOSegmentationTask(IDeploymentTask, IInferenceTask, IEvaluationTask,
     def hparams(self):
         """Hparams of OpenVINO Segmentation Task."""
         return self.task_environment.get_hyper_parameters(SegmentationConfig)
+
+    @property
+    def avg_time_per_image(self):
+        return self._avg_time_per_image
 
     def load_inferencer(self) -> OpenVINOSegmentationInferencer:
         """load_inferencer function of OpenVINO Segmentation Task."""
@@ -204,7 +210,9 @@ class OpenVINOSegmentationTask(IDeploymentTask, IInferenceTask, IEvaluationTask,
             process_soft_prediction = False
 
         dataset_size = len(dataset)
+        total_time = 0.0
         for i, dataset_item in enumerate(dataset, 1):
+            start_time = time.perf_counter()
             predicted_scene, feature_vector, soft_prediction = self.inferencer.predict(dataset_item.numpy)
             dataset_item.append_annotations(predicted_scene.annotations)
 
@@ -231,7 +239,15 @@ class OpenVINOSegmentationTask(IDeploymentTask, IInferenceTask, IEvaluationTask,
                     )
                     dataset_item.append_metadata_item(result_media, model=self.model)
 
+            end_time = time.perf_counter() - start_time
+            total_time += end_time
             update_progress_callback(int(i / dataset_size * 100), None)
+
+
+        self._avg_time_per_image = total_time / dataset_size
+        logger.info(f"Avg time per image: {self._avg_time_per_image} secs")
+        logger.info(f"Total time: {total_time} secs")
+        logger.info("Segmentation OpenVINO inference completed")
 
         return dataset
 
