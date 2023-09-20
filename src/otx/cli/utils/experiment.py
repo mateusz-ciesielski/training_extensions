@@ -251,3 +251,34 @@ class GpuUsageRecorder(ResourceRecorder):
     def __del__(self):
         """Shutdown nvml."""
         pynvml.nvmlShutdown()
+
+
+def set_arguments_to_cmd(command: List[str], key: str, value: Optional[str] = None, start_idx: int = 0, after_params: bool = False):
+    """Add arguments at proper position in command.
+
+    Args:
+        keys (str): arguement key.
+        value (str or None): argument value.
+        command (List[str]): list includng a otx command entry and arguments.
+        start_idx (int, optional): find a position to put arguments in after this value. Defaults to 0.
+        after_params (bool): whether argument should be after `param` or not.
+    """
+    if key in command:
+        if value is not None:
+            command[command.index(key) + 1] = value
+        return
+
+    delimiters = ["demo", "deploy", "eval", "explain", "export", "find", "train", "optimize", "build", "run"]
+    if not after_params:
+        delimiters.append("params")
+
+    for i in range(start_idx, len(command)):
+        if command[i] in delimiters:
+            if value is not None:
+                command.insert(i, value)
+            command.insert(i, key)
+            break
+    else:
+        command.append(key)
+        if value is not None:
+            command.append(value)
