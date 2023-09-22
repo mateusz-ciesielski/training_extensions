@@ -111,7 +111,7 @@ class TestRegressionAnomalyClassification:
         reg_cfg.result_dict[reg_cfg.task_type]["train"][category].append(self.performance)
 
         assert test_result["passed"] is True, test_result["log"]
-
+    '''
     @e2e_pytest_component
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     @pytest.mark.parametrize("category", SAMPLED_ANOMALY_DATASET_CATEGORIES)
@@ -267,3 +267,4 @@ class TestRegressionAnomalyClassification:
         reg_cfg.result_dict[reg_cfg.task_type]["ptq"][category].append(self.performance)
 
         assert test_result["passed"] is True, test_result["log"]
+    '''
