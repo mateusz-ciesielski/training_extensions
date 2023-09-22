@@ -39,6 +39,27 @@
           "--input": "/data/otx/regression/coco_subset_cls_decr/images/test"
         }
       }
+    },
+    "anomaly_classification": {
+      "--train-data-roots": "/data/otx/regression/mvtec",
+      "--val-data-roots": "/data/otx/regression/mvtec",
+      "--test-data-roots": "/data/otx/regression/mvtec",
+      "--input": "/data/otx/regression/mvtec/bottle/test/contamination",
+      "train_params": []
+    },
+    "anomaly_detection": {
+      "--train-data-roots": "/data/otx/regression/mvtec",
+      "--val-data-roots": "/data/otx/regression/mvtec",
+      "--test-data-roots": "/data/otx/regression/mvtec",
+      "--input": "/data/otx/regression/mvtec/bottle/test/contamination",
+      "train_params": []
+    },
+    "anomaly_segmentation": {
+      "--train-data-roots": "/data/otx/regression/mvtec",
+      "--val-data-roots": "/data/otx/regression/mvtec",
+      "--test-data-roots": "/data/otx/regression/mvtec",
+      "--input": "/data/otx/regression/mvtec/bottle/test/contamination",
+      "train_params": []
     }
   },
   "regression_criteria": {
