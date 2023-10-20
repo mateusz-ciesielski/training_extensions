@@ -6,7 +6,8 @@
 
 import torch
 import torch.nn.functional as F
-from mmcv.ops import multi_scale_deform_attn
+
+# from mmcv.ops import multi_scale_deform_attn
 
 
 def multi_scale_deformable_attn_pytorch(
@@ -138,4 +139,4 @@ def _custom_grid_sample(im: torch.Tensor, grid: torch.Tensor, align_corners: boo
     return (Ia * wa + Ib * wb + Ic * wc + Id * wd).reshape(n, c, gh, gw)
 
 
-multi_scale_deform_attn.multi_scale_deformable_attn_pytorch = multi_scale_deformable_attn_pytorch
+# multi_scale_deform_attn.multi_scale_deformable_attn_pytorch = multi_scale_deformable_attn_pytorch
