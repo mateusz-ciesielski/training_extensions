@@ -32,7 +32,7 @@ jobs:
         run: tox -vv -e pre-commit-all-py310-pt1
   Unit-Test:
     needs: Code-Quality-Checks
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest-32-cores
     timeout-minutes: 120
     strategy:
       fail-fast: false
