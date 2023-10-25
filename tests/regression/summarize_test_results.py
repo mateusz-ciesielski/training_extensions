@@ -304,7 +304,7 @@ def summarize_results_data(input_path: str, output_path: str):
 
 
 def main():
-    summarize_results_data("/tmp/regression_test_results/", "./reg_results")
+    summarize_results_data(os.path.join(os.environ.get("REG_RES_ROOT", "/tmp/"), "regression_test_results/"), "./reg_results")
 
 if __name__ == "__main__":
     main()
