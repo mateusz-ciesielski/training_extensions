@@ -206,7 +206,12 @@ def monkey_patched_xpu_nms(ctx, bboxes, scores, iou_threshold, offset, score_thr
         bboxes, scores = bboxes[valid_mask], scores[valid_mask]
         valid_inds = torch.nonzero(valid_mask, as_tuple=False).squeeze(dim=1)
 
-    if offset == 0:
+    if bboxes.dtype == torch.bfloat16:
+        bboxes = bboxes.to(torch.float32)
+    if scores.dtype == torch.bfloat16:
+        scores = scores.to(torch.float32)
+
+    if offset == 0 and bboxes.dtype:
         inds = tv_nms(bboxes, scores, float(iou_threshold))
     else:
         device = bboxes.device
