@@ -14,4 +14,4 @@ def run_regression_tests(tmp_dir_path):
     input_path = os.path.join(tmp_dir_path, "regression_test_results")
     output_path = os.environ.get("TOX_WORK_DIR", os.getcwd())
 
-    summarize_results_data(input_path, output_path)
+    #summarize_results_data(input_path, output_path)
