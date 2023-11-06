@@ -127,7 +127,7 @@ def train_detector(model, dataset, cfg, distributed=False, validate=False, times
     optimizer = build_optimizer(model, cfg.optimizer)
 
     if cfg.device == "xpu":
-        # dinamic patch for nms and roi_align
+        # dynamic patch for nms and roi_align
         NMSop.forward = monkey_patched_xpu_nms
         RoIAlign.forward = monkey_patched_xpu_roi_align
         if fp16_cfg is not None:
@@ -211,7 +211,7 @@ def monkey_patched_xpu_nms(ctx, bboxes, scores, iou_threshold, offset, score_thr
     if scores.dtype == torch.bfloat16:
         scores = scores.to(torch.float32)
 
-    if offset == 0 and bboxes.dtype:
+    if offset == 0:
         inds = tv_nms(bboxes, scores, float(iou_threshold))
     else:
         device = bboxes.device
