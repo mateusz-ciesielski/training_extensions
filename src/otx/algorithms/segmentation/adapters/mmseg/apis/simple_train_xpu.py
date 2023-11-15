@@ -7,8 +7,8 @@
 import logging
 from collections import OrderedDict
 from math import inf
-from typing import Union, Optional, List
 from pathlib import Path
+from typing import List, Optional, Union
 
 import torch
 from mmcv.runner.checkpoint import save_checkpoint as mmcv_save_checkpoint
@@ -18,8 +18,8 @@ from mmseg.datasets import build_dataloader, build_dataset
 from mmseg.utils import get_root_logger
 from mmseg.utils.util_distribution import build_dp, dp_factory
 
-from otx.algorithms.common.adapters.torch.utils.utils import ModelDebugger
 from otx.algorithms.common.adapters.mmcv.utils import XPUDataParallel
+from otx.algorithms.common.adapters.torch.utils.utils import ModelDebugger
 
 dp_factory["xpu"] = XPUDataParallel
 logger = get_root_logger(logging.INFO)
@@ -61,7 +61,6 @@ def train_segmentor_debug(model, dataset, cfg, distributed=False, validate=False
         }
         val_dataloader = build_dataloader(val_dataset, **val_loader_cfg)
 
-
     # put model on devices
     if cfg.device == "xpu":
         is_fp16 = bool(cfg.get("fp16_", False))
@@ -82,14 +81,14 @@ def train_segmentor_debug(model, dataset, cfg, distributed=False, validate=False
     max_epochs = cfg.runner.max_epochs
 
     # make lr updater
-    lr_updater_policy =  cfg.lr_config.pop("policy")
+    lr_updater_policy = cfg.lr_config.pop("policy")
     if lr_updater_policy == "poly":
         lr_updater = PolyLrUpdaterHook(
             optimizer=optimizer,
             iter_per_epoch=iter_per_epoch,
             max_epochs=max_epochs,
-            max_iters = max_epochs * iter_per_epoch,
-            **cfg.lr_config
+            max_iters=max_epochs * iter_per_epoch,
+            **cfg.lr_config,
         )
     elif lr_updater_policy == "ReduceLROnPlateau":
         lr_updater = ReduceLROnPlateauLrUpdater(optimizer=optimizer, iter_per_epoch=iter_per_epoch, **cfg.lr_config)
@@ -122,10 +121,9 @@ def train_segmentor_debug(model, dataset, cfg, distributed=False, validate=False
             optimizer.step()
 
             iter_idx += 1
-            if (i+1) % 10 == 0 or i+1 == iter_per_epoch: # progress log
+            if (i + 1) % 10 == 0 or i + 1 == iter_per_epoch:  # progress log
                 logger.info(
-                    f"[{i+1} / {iter_per_epoch}] " + \
-                    " / ".join([f"{key} : {val}" for key, val in log_vars.items()])
+                    f"[{i+1} / {iter_per_epoch}] " + " / ".join([f"{key} : {val}" for key, val in log_vars.items()])
                 )
 
         # eval
@@ -133,10 +131,10 @@ def train_segmentor_debug(model, dataset, cfg, distributed=False, validate=False
             model.eval()
             logger.info(f"Epoch #{epoch + 1} evaluation starts")
             eval_result = single_gpu_test(model, val_dataloader, show=False)
-            eval_res = val_dataloader.dataset.evaluate(eval_result, logger=logger, metric='mDice', show_log=True)
+            eval_res = val_dataloader.dataset.evaluate(eval_result, logger=logger, metric="mDice", show_log=True)
             lr_updater.register_score(eval_res["mDice"])
 
-        save_checkpoint(model, optimizer, cfg.work_dir, epoch+1)
+        save_checkpoint(model, optimizer, cfg.work_dir, epoch + 1)
 
 
 def parse_losses(losses):
@@ -158,13 +156,11 @@ def parse_losses(losses):
         elif isinstance(loss_value, list):
             log_vars[loss_name] = sum(_loss.mean() for _loss in loss_value)
         else:
-            raise TypeError(
-                f'{loss_name} is not a tensor or list of tensors')
+            raise TypeError(f"{loss_name} is not a tensor or list of tensors")
 
-    loss = sum(_value for _key, _value in log_vars.items()
-                if 'loss' in _key)
+    loss = sum(_value for _key, _value in log_vars.items() if "loss" in _key)
 
-    log_vars['loss'] = loss
+    log_vars["loss"] = loss
     for loss_name, loss_value in log_vars.items():
         # reduce loss when distributed training
         log_vars[loss_name] = loss_value.item()
@@ -175,14 +171,14 @@ def parse_losses(losses):
 def save_checkpoint(model, optim, out_dir: Union[str, Path], epoch: int, max_keep_ckpts=1):
     """Save the current checkpoint and delete unwanted checkpoint."""
     out_dir: Path = Path(out_dir)
-    name = 'epoch_{}.pth'
+    name = "epoch_{}.pth"
 
     filename = name.format(epoch)
     filepath = out_dir / filename
     mmcv_save_checkpoint(model, str(filepath), optimizer=optim)
     # in some environments, `os.symlink` is not supported, you may need to
     # set `create_symlink` to False
-    dst_file = out_dir / 'latest.pth'
+    dst_file = out_dir / "latest.pth"
     if dst_file.exists():
         dst_file.unlink()
     dst_file.symlink_to(filename)
@@ -214,25 +210,26 @@ class LrUpdater:
             number of iteration that warmup lasts
     """
 
-    def __init__(self,
-                 optimizer,
-                 iter_per_epoch,
-                 by_epoch: bool = True,
-                 warmup: Optional[str] = None,
-                 warmup_iters: int = 0,
-                 warmup_ratio: float = 0.1,
-                 warmup_by_epoch: bool = False) -> None:
+    def __init__(
+        self,
+        optimizer,
+        iter_per_epoch,
+        by_epoch: bool = True,
+        warmup: Optional[str] = None,
+        warmup_iters: int = 0,
+        warmup_ratio: float = 0.1,
+        warmup_by_epoch: bool = False,
+    ) -> None:
         # validate the "warmup" argument
         if warmup is not None:
-            if warmup not in ['constant', 'linear', 'exp']:
+            if warmup not in ["constant", "linear", "exp"]:
                 raise ValueError(
                     f'"{warmup}" is not a supported type for warming up, valid'
-                    ' types are "constant", "linear" and "exp"')
+                    ' types are "constant", "linear" and "exp"'
+                )
         if warmup is not None:
-            assert warmup_iters > 0, \
-                '"warmup_iters" must be a positive integer'
-            assert 0 < warmup_ratio <= 1.0, \
-                '"warmup_ratio" must be in range (0,1]'
+            assert warmup_iters > 0, '"warmup_iters" must be a positive integer'
+            assert 0 < warmup_ratio <= 1.0, '"warmup_ratio" must be in range (0,1]'
 
         self.optimizer = optimizer
         self.iter_per_epoch = iter_per_epoch
@@ -261,15 +258,14 @@ class LrUpdater:
     def register_score(self, score):
         self.current_score = score
 
-    def _set_lr(self,  lr_groups):
+    def _set_lr(self, lr_groups):
         if isinstance(self.optimizer, dict):
             for k, optim in self.optimizer.items():
                 for param_group, lr in zip(optim.param_groups, lr_groups[k]):
-                    param_group['lr'] = lr
+                    param_group["lr"] = lr
         else:
-            for param_group, lr in zip(self.optimizer.param_groups,
-                                       lr_groups):
-                param_group['lr'] = lr
+            for param_group, lr in zip(self.optimizer.param_groups, lr_groups):
+                param_group["lr"] = lr
 
     def get_lr(self, base_lr: float):
         raise NotImplementedError
@@ -278,10 +274,7 @@ class LrUpdater:
         if isinstance(self.optimizer, dict):
             lr_groups = {}
             for k in self.optimizer.keys():
-                _lr_group = [
-                    self.get_lr(_base_lr)
-                    for _base_lr in self.base_lr[k]
-                ]
+                _lr_group = [self.get_lr(_base_lr) for _base_lr in self.base_lr[k]]
                 lr_groups.update({k: _lr_group})
 
             return lr_groups
@@ -289,16 +282,14 @@ class LrUpdater:
             return [self.get_lr(_base_lr) for _base_lr in self.base_lr]
 
     def get_warmup_lr(self, cur_iters: int):
-
         def _get_warmup_lr(cur_iters, regular_lr):
-            if self.warmup == 'constant':
+            if self.warmup == "constant":
                 warmup_lr = [_lr * self.warmup_ratio for _lr in regular_lr]
-            elif self.warmup == 'linear':
-                k = (1 - cur_iters / self.warmup_iters) * (1 -
-                                                           self.warmup_ratio)
+            elif self.warmup == "linear":
+                k = (1 - cur_iters / self.warmup_iters) * (1 - self.warmup_ratio)
                 warmup_lr = [_lr * (1 - k) for _lr in regular_lr]
-            elif self.warmup == 'exp':
-                k = self.warmup_ratio**(1 - cur_iters / self.warmup_iters)
+            elif self.warmup == "exp":
+                k = self.warmup_ratio ** (1 - cur_iters / self.warmup_iters)
                 warmup_lr = [_lr * k for _lr in regular_lr]
             return warmup_lr
 
@@ -317,18 +308,13 @@ class LrUpdater:
             self.base_lr = {}
             for k, optim in self.optimizer.items():
                 for group in optim.param_groups:
-                    group.setdefault('initial_lr', group['lr'])
-                _base_lr = [
-                    group['initial_lr'] for group in optim.param_groups
-                ]
+                    group.setdefault("initial_lr", group["lr"])
+                _base_lr = [group["initial_lr"] for group in optim.param_groups]
                 self.base_lr.update({k: _base_lr})
         else:
             for group in self.optimizer.param_groups:  # type: ignore
-                group.setdefault('initial_lr', group['lr'])
-            self.base_lr = [
-                group['initial_lr']
-                for group in self.optimizer.param_groups  # type: ignore
-            ]
+                group.setdefault("initial_lr", group["lr"])
+            self.base_lr = [group["initial_lr"] for group in self.optimizer.param_groups]  # type: ignore
 
     def before_train_epoch(self):
         if self.warmup_iters is None:
@@ -364,15 +350,13 @@ class LrUpdater:
         if isinstance(self.optimizer, dict):
             lr_groups = {}
             for k in self.optimizer.keys():
-                _lr_group = [
-                    self.get_lr(_base_lr)
-                    for _base_lr in self.base_lr[k]
-                ]
+                _lr_group = [self.get_lr(_base_lr) for _base_lr in self.base_lr[k]]
                 lr_groups.update({k: _lr_group})
 
             return lr_groups
         else:
             return [self.get_lr(_base_lr) for _base_lr in self.base_lr]
+
 
 class ReduceLROnPlateauLrUpdater(LrUpdater):
     """Reduce learning rate when a metric has stopped improving.
@@ -517,9 +501,7 @@ class ReduceLROnPlateauLrUpdater(LrUpdater):
 
             self.last_iter = self.current_iter
             self.bad_count = 0
-            logger.info(
-                f"\nDrop LR from: {self.current_lr}, to: " f"{max(self.current_lr * self.factor, self.min_lr)}"
-            )
+            logger.info(f"\nDrop LR from: {self.current_lr}, to: " f"{max(self.current_lr * self.factor, self.min_lr)}")
             self.current_lr = max(self.current_lr * self.factor, self.min_lr)
         return self.current_lr
 
@@ -535,14 +517,9 @@ class ReduceLROnPlateauLrUpdater(LrUpdater):
         self.current_lr = -1.0
         self.best_score = self.init_value_map[self.rule]
 
-class PolyLrUpdaterHook(LrUpdater):
 
-    def __init__(self,
-                 power: float = 1.,
-                 min_lr: float = 0.,
-                 max_epochs = None,
-                 max_iters = None,
-                 **kwargs) -> None:
+class PolyLrUpdaterHook(LrUpdater):
+    def __init__(self, power: float = 1.0, min_lr: float = 0.0, max_epochs=None, max_iters=None, **kwargs) -> None:
         self.power = power
         self.min_lr = min_lr
         self.max_epochs = max_epochs
@@ -556,5 +533,5 @@ class PolyLrUpdaterHook(LrUpdater):
         else:
             progress = self.current_iter
             max_progress = self.max_iters
-        coeff = (1 - progress / max_progress)**self.power
+        coeff = (1 - progress / max_progress) ** self.power
         return (base_lr - self.min_lr) * coeff + self.min_lr

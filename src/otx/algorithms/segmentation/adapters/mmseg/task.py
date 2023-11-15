@@ -39,8 +39,8 @@ from otx.algorithms.common.configs.training_base import TrainType
 from otx.algorithms.common.tasks.nncf_task import NNCFBaseTask
 from otx.algorithms.common.utils.data import get_dataset
 from otx.algorithms.common.utils.logger import get_logger
-from otx.algorithms.segmentation.adapters.mmseg.apis.train import train_segmentor
 from otx.algorithms.segmentation.adapters.mmseg.apis import train_segmentor_debug
+from otx.algorithms.segmentation.adapters.mmseg.apis.train import train_segmentor
 from otx.algorithms.segmentation.adapters.mmseg.configurer import (
     IncrSegmentationConfigurer,
     SegmentationConfigurer,
