@@ -32,7 +32,7 @@ on:
         default: "test-results"
       toxenv-ptver:
         type: string
-        default: "pt1"
+        default: "pt2"
 jobs:
   run_tests_in_tox:
     # tricky workaround to pass list from the string input type
