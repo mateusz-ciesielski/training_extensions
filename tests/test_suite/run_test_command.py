@@ -145,13 +145,14 @@ def otx_train_testing(template, root, otx_dir, args, deterministic=True):
     check_run(command_line)
     assert os.path.exists(f"{template_work_dir}/trained_{template.model_template_id}/models/weights.pth")
     assert os.path.exists(f"{template_work_dir}/trained_{template.model_template_id}/models/label_schema.json")
-    assert os.path.exists(f"{template_work_dir}/trained_{template.model_template_id}/resource_usage.yaml")
 
-    output_tmp_dir = os.path.join(os.environ.get("TOX_ENV_DIR", os.getcwd()), "tmp")
-    shutil.copy(
-        f"{template_work_dir}/trained_{template.model_template_id}/resource_usage.yaml",
-        os.path.join(output_tmp_dir, f"rt-{template.model_template_id}.yaml"),
-    )
+    if "--track-resource-usage" in args:
+        assert os.path.exists(f"{template_work_dir}/trained_{template.model_template_id}/resource_usage.yaml")
+        output_tmp_dir = os.path.join(os.environ.get("TOX_ENV_DIR", os.getcwd()), "tmp")
+        shutil.copy(
+            f"{template_work_dir}/trained_{template.model_template_id}/resource_usage.yaml",
+            os.path.join(output_tmp_dir, f"rt-{template.model_template_id}.yaml"),
+        )
 
 
 def otx_resume_testing(template, root, otx_dir, args):
