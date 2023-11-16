@@ -19,9 +19,11 @@ jobs:
           - task: "cls"
             test_args: "tests/e2e/cli/classification"
           - task: "det"
-            test_args: '-m "not req_large_memory and not req_large_gpu_memory" tests/e2e/cli/detection'
+            # test_args: '-m "not req_large_memory and not req_large_gpu_memory" tests/e2e/cli/detection'
+            test_args: "tests/e2e/cli/detection"
           - task: "iseg"
-            test_args: '-m "not req_large_memory and not req_large_gpu_memory" tests/e2e/cli/instance_segmentation'
+            # test_args: '-m "not req_large_memory and not req_large_gpu_memory" tests/e2e/cli/instance_segmentation'
+            test_args: "tests/e2e/cli/instance_segmentation"
           - task: "seg"
             test_args: "tests/e2e/cli/semantic_segmentation"
           - task: "visprompt"
@@ -36,5 +38,5 @@ jobs:
       timeout-minutes: 360
       upload-artifact: true
       artifact-prefix: "daily-test-results"
-      runs-on: "['otx-gpu-v100-2']"
-      custom-container: true
+      # runs-on: "['otx-gpu-v100-2']"
+      # custom-container: true
