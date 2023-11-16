@@ -43,6 +43,7 @@ args0 = {
     "--val-data-roots": "tests/assets/classification_dataset",
     "--test-data-roots": "tests/assets/classification_dataset",
     "--input": "tests/assets/classification_dataset/0",
+    "--track-resource-usage": "all",
     "train_params": [
         "params",
         "--learning_parameters.num_iters",
@@ -58,6 +59,7 @@ args = {
     "--val-data-roots": "tests/assets/classification_dataset_class_incremental",
     "--test-data-roots": "tests/assets/classification_dataset_class_incremental",
     "--input": "tests/assets/classification_dataset/0",
+    "--track-resource-usage": "all",
     "train_params": [
         "params",
         "--learning_parameters.num_iters",
@@ -336,6 +338,7 @@ args0_m = {
     "--val-data-roots": "tests/assets/datumaro_multilabel",
     "--test-data-roots": "tests/assets/datumaro_multilabel",
     "--input": "tests/assets/datumaro_multilabel/images/train",
+    "--track-resource-usage": "all",
     "train_params": [
         "params",
         "--learning_parameters.num_iters",
@@ -352,6 +355,7 @@ args_m = {
     "--val-data-roots": "tests/assets/datumaro_multilabel",
     "--test-data-roots": "tests/assets/datumaro_multilabel",
     "--input": "tests/assets/datumaro_multilabel/images/train",
+    "--track-resource-usage": "all",
     "train_params": [
         "params",
         "--learning_parameters.num_iters",
@@ -526,6 +530,7 @@ args_h = {
     "--val-data-roots": "tests/assets/datumaro_h-label",
     "--test-data-roots": "tests/assets/datumaro_h-label",
     "--input": "tests/assets/datumaro_h-label/images/train",
+    "--track-resource-usage": "all",
     "train_params": [
         "params",
         "--learning_parameters.num_iters",
@@ -699,6 +704,7 @@ class TestToolsHierarchicalClassification:
 args_selfsl = {
     "--train-data-roots": "tests/assets/classification_dataset",
     "--train-type": "Selfsupervised",
+    "--track-resource-usage": "all",
     "train_params": [
         "params",
         "--learning_parameters.num_iters",

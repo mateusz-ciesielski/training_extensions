@@ -277,6 +277,7 @@ args_semisl = {
     "--val-data-roots": "tests/assets/common_semantic_segmentation_dataset/val",
     "--test-data-roots": "tests/assets/common_semantic_segmentation_dataset/val",
     "--unlabeled-data-roots": "tests/assets/common_semantic_segmentation_dataset/train",
+    "--track-resource-usage": "all",
     "train_params": ["params", "--learning_parameters.num_iters", "2", "--learning_parameters.batch_size", "4"],
 }
 
@@ -310,6 +311,7 @@ args_selfsl = {
     "--train-data-roots": "tests/assets/common_semantic_segmentation_dataset/train/images",
     "--train-type": "Selfsupervised",
     "--input": "tests/assets/segmentation/custom/images/training",
+    "--track-resource-usage": "all",
     "train_params": ["params", "--learning_parameters.num_iters", "5", "--learning_parameters.batch_size", "4"],
 }
 
