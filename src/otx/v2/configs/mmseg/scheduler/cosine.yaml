@@ -1,0 +1,3 @@
+# optimizer scheduler
+param_scheduler:
+  type: CosineAnnealingLR

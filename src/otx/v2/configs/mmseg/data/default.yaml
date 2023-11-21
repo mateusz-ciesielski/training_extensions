@@ -1,0 +1,51 @@
+# dataloaders and augmentations for mmseg
+train_dataloader:
+  batch_size: 8
+  num_workers: 2
+  dataset:
+    type: OTXSegDataset
+    pipeline:
+      - type: LoadImageFromOTXDataset
+      - type: LoadAnnotationFromOTXDataset
+        _scope_: mmseg
+      - type: RandomResize
+        scale: [544, 544]
+        ratio_range: [0.5, 2.0]
+      - type: RandomCrop
+        crop_size: [512, 512]
+        cat_max_ratio: 0.75
+        _scope_: mmseg
+      - type: RandomFlip
+        prob: 0.5
+        direction: horizontal
+      - type: PackSegInputs
+        _scope_: mmseg
+
+val_dataloader:
+  batch_size: 8
+  num_workers: 2
+  shuffle: false
+  dataset:
+    type: OTXSegDataset
+    pipeline:
+      - type: LoadImageFromOTXDataset
+      - type: Resize
+        scale: [544, 544]
+      - type: LoadAnnotationFromOTXDataset
+        _scope_: mmseg
+      - type: PackSegInputs
+        _scope_: mmseg
+
+test_dataloader:
+  batch_size: 8
+  num_workers: 2
+  dataset:
+    type: OTXSegDataset
+    pipeline:
+      - type: LoadImageFromOTXDataset
+      - type: Resize
+        scale: [544, 544]
+      - type: LoadAnnotationFromOTXDataset
+        _scope_: mmseg
+      - type: PackSegInputs
+        _scope_: mmseg

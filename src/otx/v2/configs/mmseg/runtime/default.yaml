@@ -1,0 +1,26 @@
+default_scope: mmseg
+
+load_from: null
+
+evaluator:
+  type: IoUMetric
+  iou_metrics: mDice
+
+train_cfg:
+  type: EpochBasedTrainLoop
+  max_epochs: 10
+
+val_cfg:
+  type: ValLoop
+
+test_cfg:
+  type: TestLoop
+
+env_cfg:
+  dist_cfg:
+    backend: nccl
+  cudnn_benchmark: true
+
+visualizer:
+  name: visualizer
+  type: SegLocalVisualizer

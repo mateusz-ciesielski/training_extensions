@@ -1,0 +1,4 @@
+early_stopping:
+  type: EarlyStoppingHook
+  monitor: mDice
+  patience: 3

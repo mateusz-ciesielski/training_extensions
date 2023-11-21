@@ -1,0 +1,6 @@
+log_processor:
+  type: LogProcessor
+  window_size: 20
+  by_epoch: true
+
+log_level: INFO

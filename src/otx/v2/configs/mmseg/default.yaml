@@ -1,0 +1,10 @@
+# Description: This file contains the default configuration for the mmseg model.
+defaults:
+  - data: default
+  - model: otx_lite_hrnet_s_mod2
+  - optimizer: sgd
+  - scheduler: cosine
+  - runtime: default
+  - hooks: default
+  - custom_hooks: default
+  - _self_

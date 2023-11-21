@@ -9,10 +9,13 @@ from functools import partial
 from typing import Iterable
 
 import torch
+from hydra import compose
+from hydra.core.global_hydra import GlobalHydra
 from mmengine.dataset import pseudo_collate, worker_init_fn
 from mmengine.dist import get_dist_info
 from mmengine.utils import digit_version
 from mmseg.registry import DATA_SAMPLERS
+from omegaconf import OmegaConf
 from torch.utils.data import DataLoader as TorchDataLoader
 from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import Sampler
@@ -24,37 +27,6 @@ from otx.v2.api.entities.task_type import TaskType, TrainType
 from otx.v2.api.utils.decorators import add_subset_dataloader
 
 SUBSET_LIST = ["train", "val", "test", "unlabeled"]
-
-
-def get_default_pipeline(subset: str) -> list:
-    """Returns the default data processing pipeline for the given subset.
-
-    Args:
-        subset (str): The subset of the dataset. Can be "train", "val", or "test".
-
-    Returns:
-        list: The list of processing steps to be applied to the data.
-    """
-    # TODO (Eugene): Implement LoadResizeDataFromOTXDataset in second phase.
-    # CVS-124394
-    if subset == "train":
-        return [
-            {"type": "LoadImageFromOTXDataset"},
-            {"type": "LoadAnnotationFromOTXDataset", "_scope_": "mmseg"},
-            {"type": "RandomResize", "scale": (544, 544), "ratio_range": (0.5, 2.0)},
-            {"type": "RandomCrop", "crop_size": (512, 512), "cat_max_ratio": 0.75, "_scope_": "mmseg"},
-            {"type": "RandomFlip", "prob": 0.5, "direction": "horizontal"},
-            {"type": "PackSegInputs", "_scope_": "mmseg"},
-        ]
-    if subset in ("val", "test"):
-        return [
-            {"type": "LoadImageFromOTXDataset"},
-            {"type": "Resize", "scale": (544, 544)},
-            {"type": "LoadAnnotationFromOTXDataset", "_scope_": "mmseg"},
-            {"type": "PackSegInputs", "_scope_": "mmseg"},
-        ]
-    msg = "Not supported subset"
-    raise NotImplementedError(msg)
 
 
 @add_subset_dataloader(SUBSET_LIST)
@@ -115,6 +87,11 @@ class MMSegDataset(MMXDataset):
         )
         self.scope = "mmseg"
         self.dataset_registry = MMSegmentationRegistry().get("dataset")
+        if GlobalHydra.instance().is_initialized():
+            self.cfg = compose("default")
+        else:
+            msg = "Global Hydra is not initialized."
+            raise RuntimeError(msg)
 
     def _get_sub_task_dataset(self) -> TorchDataset:
         return OTXSegDataset
@@ -215,7 +192,7 @@ class MMSegDataset(MMXDataset):
         """
         dataset_config = config.get("dataset", config) if config is not None else {}
         if pipeline is None and "pipeline" not in dataset_config:
-            pipeline = get_default_pipeline(subset=subset)
+            pipeline = OmegaConf.to_container(self.cfg.data[f'{subset}_dataloader'].dataset.pipeline)
         return super()._build_dataset(subset, pipeline, config)
 
     @property

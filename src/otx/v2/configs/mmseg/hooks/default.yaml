@@ -1,0 +1,11 @@
+default_hooks:
+  logger:
+    type: LoggerHook
+    interval: 100
+  timer:
+    type: IterTimerHook
+  checkpoint:
+    type: CheckpointHook
+    interval: 1
+    max_keep_ckpts: 1
+    save_best: auto

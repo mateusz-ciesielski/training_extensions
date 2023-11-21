@@ -8,9 +8,11 @@ from __future__ import annotations
 import copy
 import fnmatch
 import re
-import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+from hydra import compose
+from omegaconf import OmegaConf
 
 if TYPE_CHECKING:
     import torch
@@ -22,8 +24,8 @@ from otx.v2.api.utils.logger import get_logger
 
 logger = get_logger()
 
-MODEL_CONFIG_PATH = Path(get_otx_root_path()) / "v2/configs/segmentation/models"
-MODEL_CONFIGS = get_files_dict(MODEL_CONFIG_PATH)
+MODEL_CONFIG_PATH = Path(get_otx_root_path()) / "v2/configs/mmseg"
+MODEL_CONFIGS = get_files_dict(Path(MODEL_CONFIG_PATH / "model"))
 
 
 def replace_num_classes(d: Config | dict, num_classes: int) -> None:
@@ -73,51 +75,16 @@ def get_model(
     Returns:
         torch.nn.Module: The PyTorch model for pretraining.
     """
-    model_name = None
-    model_cfg = None
-    if isinstance(model, dict):
-        model_cfg = Config(cfg_dict={"model": model}) if not model.get("model") else Config(cfg_dict=model)
-    elif isinstance(model, str):
-        if Path(model).is_file():
-            model_cfg = Config.fromfile(filename=model)
-        else:
-            model_name = model
-
-    if isinstance(model_cfg, Config) and hasattr(model_cfg, "model") and hasattr(model_cfg.model, "name"):
-        model_name = model_cfg.model.pop("name")
-
-    if isinstance(model_name, str) and model_name in MODEL_CONFIGS:
-        if model_cfg is None:
-            model_cfg = Config.fromfile(filename=MODEL_CONFIGS[model_name])
-        else:
-            base = Config.fromfile(filename=MODEL_CONFIGS[model_name])
-            model_cfg = Config(cfg_dict=Config.merge_cfg_dict(base, model_cfg))
-
-    if model_cfg is None:
-        msg = "model must be a string representing the model name, a Config object, or a dictionary."
-        raise ValueError(msg)
+    # figure out relative path to the model config
+    cfg = compose(config_name="default")
+    model_cfg = Config(OmegaConf.to_container(cfg.model, resolve=True))
 
     if num_classes is not None:
         replace_num_classes(model_cfg, num_classes)
 
     metainfo = None
-    if pretrained is True and "load_from" in model_cfg:
-        pretrained = model_cfg.load_from
-
-    if pretrained is True:
-        warnings.warn("Unable to find pre-defined checkpoint of the model.", stacklevel=2)
-        pretrained = None
-    elif pretrained is False:
-        pretrained = None
-
-    if kwargs:
-        model_cfg.merge_from_dict({"model": kwargs})
-    model_cfg.model.setdefault("data_preprocessor", model_cfg.get("data_preprocessor", None))
-
-    if not hasattr(model_cfg, "model"):
-        model_cfg["_scope_"] = "mmseg"
-    else:
-        model_cfg["model"]["_scope_"] = "mmseg"
+    if pretrained is True and "load_from" in cfg.runtime:
+        pretrained = cfg.runtime.load_from
 
     from mmengine.registry import DefaultScope
 
@@ -149,7 +116,7 @@ def get_model(
     seg_model.eval()
 
     source_config = copy.deepcopy(seg_model._config.model)  # noqa: SLF001
-    source_config.name = model_name
+
     seg_model.config_dict = Config.to_dict(source_config)
     return seg_model
 
