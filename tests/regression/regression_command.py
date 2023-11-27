@@ -65,7 +65,7 @@ def regression_eval_testing(
             "criteria": model_criteria,
             "threshold": threshold,
             "eval_total_gpu_time": total_gpu_time,
-            "eval_avg_gpu_time": total_gpu_time / len(matched_val_times),
+            "eval_avg_gpu_time": total_gpu_time / (len(matched_val_times) + 1e-9),
         }
 
     result_dict["Model size (MB)"] = round(

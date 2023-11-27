@@ -15,6 +15,7 @@ from tests.regression.regression_test_helpers import (
     ANOMALY_DATASET_CATEGORIES,
     TIME_LOG,
     RegressionTestConfig,
+    get_train_gpu_time,
 )
 from tests.test_suite.e2e_test_system import e2e_pytest_component
 from tests.test_suite.run_test_command import (
@@ -92,8 +93,9 @@ class TestRegressionAnomalyClassification:
 
         tmp_dir_path = tmp_dir_path / reg_cfg.task_type
         train_start_time = timer()
-        otx_train_testing(template, tmp_dir_path, reg_cfg.otx_dir, category_data_args, deterministic=False)
+        train_output = otx_train_testing(template, tmp_dir_path, reg_cfg.otx_dir, category_data_args, deterministic=False)
         train_elapsed_time = timer() - train_start_time
+        avg_train_time, total_train_time = get_train_gpu_time(''.join(train_output))
 
         infer_start_time = timer()
         test_result = regression_eval_testing(
@@ -108,6 +110,12 @@ class TestRegressionAnomalyClassification:
 
         self.performance[template.name][TIME_LOG["train_time"]] = round(train_elapsed_time, 3)
         self.performance[template.name][TIME_LOG["infer_time"]] = round(infer_elapsed_time, 3)
+        self.performance[template.name]["raw_gpu_time"] = round(test_result["raw"]["eval_total_gpu_time"], 3)
+        self.performance[template.name]["raw_avg_gpu_time"] = round(test_result["raw"]["eval_avg_gpu_time"], 3)
+
+        self.performance[template.name]["raw_train_gpu_time"] = round(total_train_time, 3)
+        self.performance[template.name]["raw_train_avg_gpu_time"] = round(avg_train_time, 3)
+
         reg_cfg.result_dict[reg_cfg.task_type]["train"][category].append(self.performance)
 
         assert test_result["passed"] is True, test_result["log"]
