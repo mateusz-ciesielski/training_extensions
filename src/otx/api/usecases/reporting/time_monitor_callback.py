@@ -157,6 +157,7 @@ class TimeMonitorCallback(Callback):
         self.current_step = self.total_steps - self.test_steps
         self.current_epoch = self.total_epochs
         self.is_training = False
+        self.__reset_stat()
 
     def on_epoch_begin(self, epoch, logs=None):
         """Set the number of current epoch and start the timer."""
@@ -177,3 +178,7 @@ class TimeMonitorCallback(Callback):
     def get_progress(self):
         """Returns current progress as a percentage."""
         return (self.current_step / self.total_steps) * 100
+
+    def __reset_stat(self):
+        self.past_step_duration = []
+        self.average_step = 0

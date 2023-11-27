@@ -17,6 +17,7 @@ TODO Since only one progressbar callback is supported HPO is combined into one c
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
+import time
 from typing import Optional, Union
 
 from pytorch_lightning.callbacks.progress import TQDMProgressBar
@@ -39,11 +40,18 @@ class ProgressCallback(TQDMProgressBar):
         self.current_epoch: int = 0
         self.max_epochs: int = 0
         self._progress: float = 0
+        self.current_step = 0
 
         if parameters is not None:
             self.progress_and_hpo_callback = parameters.update_progress
         else:
             self.progress_and_hpo_callback = default_progress_callback
+
+        # Step time calculation
+        self.start_step_time = time.time()
+        self.past_step_duration = []
+        self.average_step = 0
+        self.step_history = 50
 
     def on_train_start(self, trainer, pl_module):
         """Store max epochs and current epoch from trainer."""
@@ -51,16 +59,26 @@ class ProgressCallback(TQDMProgressBar):
         self.current_epoch = trainer.current_epoch
         self.max_epochs = trainer.max_epochs
         self._reset_progress()
+        self.__reset_stat()
+
 
     def on_predict_start(self, trainer, pl_module):
         """Reset progress bar when prediction starts."""
         super().on_predict_start(trainer, pl_module)
         self._reset_progress()
+        self.__reset_stat()
+
 
     def on_test_start(self, trainer, pl_module):
         """Reset progress bar when testing starts."""
         super().on_test_start(trainer, pl_module)
         self._reset_progress()
+        self.__reset_stat()
+
+    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
+        """Set the value of current step and start the timer."""
+        self.current_step += 1
+        self.start_step_time = time.time()
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         """Adds training completion percentage to the progress bar."""
@@ -68,15 +86,31 @@ class ProgressCallback(TQDMProgressBar):
         self.current_epoch = trainer.current_epoch
         self._update_progress(stage="train")
 
+        self.__calculate_average_step()
+        print(f"\nAverage GPU train batch time: {self.average_step}")
+
+    def on_predict_batch_start(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        """Set the value of current step and start the timer."""
+        self.current_step += 1
+        self.start_step_time = time.time()
+
     def on_predict_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         """Adds prediction completion percentage to the progress bar."""
         super().on_predict_batch_end(trainer, pl_module, outputs, batch, batch_idx, dataloader_idx)
         self._update_progress(stage="predict")
 
+    def on_test_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+        """Set the number of current epoch and start the timer."""
+        self.current_step += 1
+        self.start_step_time = time.time()
+
     def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         """Adds testing completion percentage to the progress bar."""
         super().on_test_batch_end(trainer, pl_module, outputs, batch, batch_idx, dataloader_idx)
         self._update_progress(stage="test")
+
+        self.__calculate_average_step()
+        print(f"\nAverage GPU test batch time: {self.average_step}")
 
     def on_validation_epoch_end(self, trainer, pl_module):  # pylint: disable=unused-argument
         """If score exists in trainer.logged_metrics, report the score."""
@@ -119,3 +153,14 @@ class ProgressCallback(TQDMProgressBar):
     def _update_progress(self, stage: str):
         progress = self._get_progress(stage)
         self.progress_and_hpo_callback(int(progress), None)
+
+    def __calculate_average_step(self):
+        """Compute average duration taken to complete a step."""
+        self.past_step_duration.append(time.time() - self.start_step_time)
+        if len(self.past_step_duration) > self.step_history:
+            self.past_step_duration.remove(self.past_step_duration[0])
+        self.average_step = sum(self.past_step_duration) / len(self.past_step_duration)
+
+    def __reset_stat(self):
+        self.past_step_duration = []
+        self.average_step = 0

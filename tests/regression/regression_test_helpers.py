@@ -30,7 +30,7 @@ TASK_TYPES = [
     "instance_segmentation",
     # "action_classification",
     # "action_detection",
-    # "anomaly",
+    "anomaly",
 ]
 TRAIN_TYPES = ["supervised"]
 LABEL_TYPES = ["multi_class"]
