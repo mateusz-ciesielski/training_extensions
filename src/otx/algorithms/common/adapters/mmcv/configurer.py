@@ -34,9 +34,9 @@ from otx.algorithms.common.utils import (
     is_xpu_available,
 )
 from otx.algorithms.common.utils.data import compute_robust_dataset_statistics
-from otx.algorithms.common.utils.logger import get_logger
 from otx.api.usecases.reporting.time_monitor_callback import TimeMonitorCallback
 from otx.core.data import caching
+from otx.utils.logger import get_logger
 
 logger = get_logger()
 
@@ -176,7 +176,7 @@ class BaseConfigurer:
         elif "gpu_ids" not in cfg:
             cfg.gpu_ids = range(1)
 
-        # consider "cuda", "hpu" and "cpu" device only
+        # consider "cuda", "xpu", "hpu" and "cpu" device only
         if is_hpu_available():
             cfg.device = "hpu"
         elif torch.cuda.is_available():
