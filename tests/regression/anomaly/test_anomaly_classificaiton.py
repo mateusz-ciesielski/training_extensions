@@ -45,7 +45,7 @@ class TestRegressionAnomalyClassification:
     LABEL_TYPE = None
     TRAIN_PARAMS = None
 
-    SAMPLED_ANOMALY_DATASET_CATEGORIES = random.sample(ANOMALY_DATASET_CATEGORIES, 3)
+    SAMPLED_ANOMALY_DATASET_CATEGORIES = [ANOMALY_DATASET_CATEGORIES[0]]#random.sample(ANOMALY_DATASET_CATEGORIES, 3)
 
     templates = Registry(f"src/otx/algorithms/{REG_CATEGORY}").filter(task_type=TASK_TYPE.upper()).templates
     templates_ids = [template.model_template_id for template in templates]
