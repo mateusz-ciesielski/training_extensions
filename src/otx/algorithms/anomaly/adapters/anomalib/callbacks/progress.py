@@ -89,7 +89,7 @@ class ProgressCallback(TQDMProgressBar):
         self.__calculate_average_step()
         print(f"\nAverage GPU train batch time: {self.average_step}")
 
-    def on_predict_batch_start(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+    def on_predict_batch_start(self, trainer, pl_module, outputs, batch, batch_idx):
         """Set the value of current step and start the timer."""
         self.current_step += 1
         self.start_step_time = time.time()
@@ -141,7 +141,7 @@ class ProgressCallback(TQDMProgressBar):
             ) * 100
 
         elif stage == "predict":
-            self._progress = (self.predict_batch_idx / (self.total_predict_batches_current_dataloader + 1e-10)) * 100
+            self._progress = 0#(self.predict_batch_idx / (self.total_predict_batches_current_dataloader + 1e-10)) * 100
 
         elif stage == "test":
             self._progress = (self.test_batch_idx / (self.total_test_batches_current_dataloader + 1e-10)) * 100
