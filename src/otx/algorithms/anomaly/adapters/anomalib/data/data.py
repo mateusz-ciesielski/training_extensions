@@ -121,7 +121,7 @@ class OTXAnomalyDataset(Dataset):
             if any((isinstance(annotation.shape, Polygon) for annotation in dataset_item.get_annotations())):
                 mask = mask_from_dataset_item(dataset_item, dataset_item.get_shapes_labels()).squeeze()
             else:
-                mask = np.zeros(dataset_item.numpy.shape[:2]).astype(np.int)
+                mask = np.zeros(dataset_item.numpy.shape[:2]).astype(np.int32)
             pre_processed = self.transform(image=dataset_item.numpy, mask=mask)
             item["image"] = pre_processed["image"]
             item["mask"] = pre_processed["mask"]
