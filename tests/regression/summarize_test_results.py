@@ -218,35 +218,35 @@ def summarize_anomaly_data(task: str, task_key: str, json_data: dict, result_dat
     train_data = task_data.get("train")
     if train_data is None:
         raise ValueError("Train data can't be empty.")
-    export_data = task_data.get("export")
-    deploy_data = task_data.get("deploy")
-    nncf_data = task_data.get("nncf")
-    ptq_data = task_data.get("ptq")
+    #export_data = task_data.get("export")
+    #deploy_data = task_data.get("deploy")
+    #nncf_data = task_data.get("nncf")
+    #ptq_data = task_data.get("ptq")
 
     for anomaly_category in ANOMALY_DATASET_CATEGORIES:
         train_cat_data = train_data.get(anomaly_category)
-        export_cat_data = export_data.get(anomaly_category)
-        deploy_cat_data = deploy_data.get(anomaly_category)
-        nncf_cat_data = nncf_data.get(anomaly_category)
-        ptq_cat_data = ptq_data.get(anomaly_category)
+        #export_cat_data = export_data.get(anomaly_category)
+        #deploy_cat_data = deploy_data.get(anomaly_category)
+        #nncf_cat_data = nncf_data.get(anomaly_category)
+        #ptq_cat_data = ptq_data.get(anomaly_category)
 
         for i, per_model_data in enumerate(train_cat_data):
             for model in per_model_data:
                 train_items = get_metric_items(get_metric_dict(train_cat_data, i, model))
-                export_items = get_metric_items(get_metric_dict(export_cat_data, i, model))
-                deploy_items = get_metric_items(get_metric_dict(deploy_cat_data, i, model))
-                nncf_items = get_metric_items(get_metric_dict(nncf_cat_data, i, model))
-                ptq_items = get_metric_items(get_metric_dict(ptq_cat_data, i, model))
+                #export_items = get_metric_items(get_metric_dict(export_cat_data, i, model))
+                #deploy_items = get_metric_items(get_metric_dict(deploy_cat_data, i, model))
+                #nncf_items = get_metric_items(get_metric_dict(nncf_cat_data, i, model))
+                #ptq_items = get_metric_items(get_metric_dict(ptq_cat_data, i, model))
 
                 result_data["Task type"].append(task)
                 result_data["MVTec Category"].append(anomaly_category)
                 result_data["Model"].append(model)
 
                 fill_model_performance(train_items, "train", result_data)
-                fill_model_performance(export_items, "export", result_data)
-                fill_model_performance(deploy_items, "deploy", result_data)
-                fill_model_performance(nncf_items, "nncf", result_data)
-                fill_model_performance(ptq_items, "ptq", result_data)
+                #fill_model_performance(export_items, "export", result_data)
+                #fill_model_performance(deploy_items, "deploy", result_data)
+                #fill_model_performance(nncf_items, "nncf", result_data)
+                #fill_model_performance(ptq_items, "ptq", result_data)
 
 
 def save_file(result_data: dict, output_path: str, file_name: str):
