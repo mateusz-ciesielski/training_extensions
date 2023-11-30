@@ -3,10 +3,13 @@ import time
 
 
 def test_memory_bound():
-    print(psutil.virtual_memory())
+    print(f"mem info: {psutil.virtual_memory()}")
     alloc = []
-    alloc_unit = bytearray(1024 * 1024 * 100)
+    unit_size = 1024 * 1024 * 100
+    alloc_unit = " " * unit_size
+    idx = 0
     while True:
-        alloc.append(alloc_unit)
-        print(psutil.virtual_memory())
-        time.sleep(5)
+        alloc.append(alloc_unit + str(idx))
+        print(f"mem info({idx}): {psutil.virtual_memory()}")
+        idx += 1
+        time.sleep(1)
