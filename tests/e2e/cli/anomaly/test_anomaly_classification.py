@@ -45,7 +45,6 @@ args = {
     "--val-data-roots": "tests/assets/anomaly/hazelnut/test",
     "--test-data-roots": "tests/assets/anomaly/hazelnut/test",
     "--input": "tests/assets/anomaly/hazelnut/test/colour",
-    "--track-resource-usage": "all",
     "train_params": [],
 }
 

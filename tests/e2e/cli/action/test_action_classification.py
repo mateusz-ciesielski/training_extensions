@@ -29,7 +29,6 @@ args = {
     "--train-data-roots": "tests/assets/cvat_dataset/action_classification/train",
     "--val-data-roots": "tests/assets/cvat_dataset/action_classification/train",
     "--test-data-roots": "tests/assets/cvat_dataset/action_classification/train",
-    "--track-resource-usage": "all",
     "train_params": ["params", "--learning_parameters.num_iters", "2", "--learning_parameters.batch_size", "4"],
 }
 

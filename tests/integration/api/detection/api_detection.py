@@ -32,7 +32,8 @@ class DetectionTaskAPIBase:
     Collection of tests for OTX API and OTX Model Templates
     """
 
-    def init_environment(self, params, model_template, number_of_images=500, task_type=TaskType.DETECTION):
+    @staticmethod
+    def init_environment(params, model_template, number_of_images=500, task_type=TaskType.DETECTION):
 
         labels_names = ("rectangle", "ellipse", "triangle")
         labels_schema = generate_label_schema(labels_names, task_type_to_label_domain(task_type))

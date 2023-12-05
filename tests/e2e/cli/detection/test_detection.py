@@ -11,7 +11,6 @@ import torch
 
 from otx.api.entities.model_template import parse_model_template
 from otx.cli.registry import Registry
-from tests.test_suite.e2e_test_system import e2e_pytest_component
 from tests.test_suite.run_test_command import (
     get_template_dir,
     nncf_eval_openvino_testing,
@@ -47,7 +46,6 @@ args0 = {
     "--val-data-roots": "tests/assets/car_tree_bug",
     "--test-data-roots": "tests/assets/car_tree_bug",
     "--input": "tests/assets/car_tree_bug/images/train",
-    "--track-resource-usage": "all",
     "train_params": ["params", "--learning_parameters.num_iters", "7", "--learning_parameters.batch_size", "4"],
 }
 
@@ -57,7 +55,6 @@ args = {
     "--val-data-roots": "tests/assets/car_tree_bug",
     "--test-data-roots": "tests/assets/car_tree_bug",
     "--input": "tests/assets/car_tree_bug/images/train",
-    "--track-resource-usage": "all",
     "train_params": ["params", "--learning_parameters.num_iters", "5", "--learning_parameters.batch_size", "4"],
 }
 
@@ -67,7 +64,6 @@ args_semisl = {
     "--test-data-roots": "tests/assets/car_tree_bug",
     "--unlabeled-data-roots": "tests/assets/car_tree_bug",
     "--input": "tests/assets/car_tree_bug/images/train",
-    "--track-resource-usage": "all",
     "train_params": ["params", "--learning_parameters.num_iters", "2", "--learning_parameters.batch_size", "2"],
 }
 
@@ -100,7 +96,6 @@ else:
 
 
 class TestToolsOTXDetection:
-    @e2e_pytest_component
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_otx_train(self, template, tmp_dir_path):
         tmp_dir_path = tmp_dir_path / "detection"
@@ -110,7 +105,6 @@ class TestToolsOTXDetection:
         args1["--load-weights"] = f"{template_work_dir}/trained_{template.model_template_id}/models/weights.pth"
         otx_train_testing(template, tmp_dir_path, otx_dir, args1)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -133,7 +127,6 @@ class TestToolsOTXDetection:
         ] = f"{template_work_dir}/trained_for_resume_{template.model_template_id}/models/weights.pth"
         otx_resume_testing(template, tmp_dir_path, otx_dir, args1)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -150,7 +143,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_export_testing(template, tmp_dir_path, dump_features)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -166,7 +158,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_export_testing(template, tmp_dir_path, half_precision=True)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -182,7 +173,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_eval_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -199,7 +189,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_eval_openvino_testing(template, tmp_dir_path, otx_dir, args, threshold=0.2, half_precision=half_precision)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -213,14 +202,12 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_explain_testing(template, tmp_dir_path, otx_dir, args, trained=True)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_otx_explain_all_classes(self, template, tmp_dir_path):
         tmp_dir_path = tmp_dir_path / "detection"
         otx_explain_testing_all_classes(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -236,28 +223,24 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_explain_testing_process_saliency_maps(template, tmp_dir_path, otx_dir, args, trained=True)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_otx_explain_openvino(self, template, tmp_dir_path):
         tmp_dir_path = tmp_dir_path / "detection"
         otx_explain_openvino_testing(template, tmp_dir_path, otx_dir, args, trained=True)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_otx_explain_all_classes_openvino(self, template, tmp_dir_path):
         tmp_dir_path = tmp_dir_path / "detection"
         otx_explain_all_classes_openvino_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_otx_explain_process_saliency_maps_openvino(self, template, tmp_dir_path):
         tmp_dir_path = tmp_dir_path / "detection"
         otx_explain_process_saliency_maps_openvino_testing(template, tmp_dir_path, otx_dir, args, trained=True)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -273,7 +256,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_demo_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -289,7 +271,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_demo_openvino_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -305,7 +286,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_deploy_openvino_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -325,7 +305,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_eval_deployment_testing(template, tmp_dir_path, otx_dir, args, threshold=0.0)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -341,7 +320,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         otx_demo_deployment_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -357,7 +335,6 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection/test_hpo"
         otx_hpo_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -376,7 +353,6 @@ class TestToolsOTXDetection:
 
         nncf_optimize_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_nncf_export(self, template, tmp_dir_path):
@@ -386,7 +362,6 @@ class TestToolsOTXDetection:
 
         nncf_export_testing(template, tmp_dir_path)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_nncf_validate_fq(self, template, tmp_dir_path):
@@ -396,7 +371,6 @@ class TestToolsOTXDetection:
 
         nncf_validate_fq_testing(template, tmp_dir_path, otx_dir, "detection", type(self).__name__)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -415,7 +389,6 @@ class TestToolsOTXDetection:
 
         nncf_eval_testing(template, tmp_dir_path, otx_dir, args, threshold=0.01)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_nncf_eval_openvino(self, template, tmp_dir_path):
@@ -425,7 +398,6 @@ class TestToolsOTXDetection:
 
         nncf_eval_openvino_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -441,21 +413,18 @@ class TestToolsOTXDetection:
         tmp_dir_path = tmp_dir_path / "detection"
         ptq_optimize_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_ptq_validate_fq(self, template, tmp_dir_path):
         tmp_dir_path = tmp_dir_path / "detection"
         ptq_validate_fq_testing(template, tmp_dir_path, otx_dir, "detection", type(self).__name__)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize("template", templates, ids=templates_ids)
     def test_ptq_eval(self, template, tmp_dir_path):
         tmp_dir_path = tmp_dir_path / "detection"
         ptq_eval_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.skipif(MULTI_GPU_UNAVAILABLE, reason="The number of gpu is insufficient")
     @pytest.mark.parametrize(
@@ -476,7 +445,6 @@ class TestToolsOTXDetection:
 
 
 class TestToolsOTXSemiSLDetection:
-    @e2e_pytest_component
     @pytest.mark.parametrize(
         "template",
         [
@@ -493,7 +461,6 @@ class TestToolsOTXSemiSLDetection:
         tmp_dir_path = tmp_dir_path / "detection/test_semisl"
         otx_train_testing(template, tmp_dir_path, otx_dir, args_semisl)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.parametrize(
         "template",
@@ -511,7 +478,6 @@ class TestToolsOTXSemiSLDetection:
         tmp_dir_path = tmp_dir_path / "detection/test_semisl"
         otx_eval_testing(template, tmp_dir_path, otx_dir, args)
 
-    @e2e_pytest_component
     @pytest.mark.skipif(TT_STABILITY_TESTS, reason="This is TT_STABILITY_TESTS")
     @pytest.mark.skipif(MULTI_GPU_UNAVAILABLE, reason="The number of gpu is insufficient")
     @pytest.mark.parametrize(

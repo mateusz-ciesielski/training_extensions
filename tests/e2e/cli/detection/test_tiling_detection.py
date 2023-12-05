@@ -40,7 +40,6 @@ args = {
     "--val-data-roots": "tests/assets/car_tree_bug",
     "--test-data-roots": "tests/assets/car_tree_bug",
     "--input": "tests/assets/car_tree_bug/images/train",
-    "--track-resource-usage": "all",
     "train_params": [
         "params",
         "--learning_parameters.num_iters",

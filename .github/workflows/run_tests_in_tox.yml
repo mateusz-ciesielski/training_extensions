@@ -66,8 +66,7 @@ jobs:
           name: ${{ inputs.artifact-prefix }}-${{ inputs.toxenv-task }}-${{ inputs.toxenv-pyver }}-${{ inputs.toxenv-ptver }}
           path: |
             .tox/tests-${{ inputs.toxenv-task }}-${{ inputs.toxenv-pyver }}-${{ inputs.toxenv-ptver }}.csv
-            .tox/tests-reg_${{ inputs.task }}_*.csv
-            .tox/tests-reg_tiling_${{ inputs.task }}_*.csv
+            .tox/tests-reg_${{ inputs.task }}*.csv
             .tox/tests-${{ inputs.toxenv-task }}-${{ inputs.toxenv-pyver }}-${{ inputs.toxenv-ptver }}/tmp/rt-*.yaml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ inputs.upload-artifact && always() }}
@@ -98,5 +97,6 @@ jobs:
           path: |
             .tox/tests-${{ inputs.toxenv-task }}-${{ inputs.toxenv-pyver }}-${{ inputs.toxenv-ptver }}.csv
             .tox/tests-reg_${{ inputs.task }}*.csv
+            .tox/tests-${{ inputs.toxenv-task }}-${{ inputs.toxenv-pyver }}-${{ inputs.toxenv-ptver }}/tmp/rt-*.yaml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ inputs.upload-artifact && always() }}

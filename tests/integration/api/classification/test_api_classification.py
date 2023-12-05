@@ -37,7 +37,7 @@ from otx.api.entities.subset import Subset
 from otx.api.entities.task_environment import TaskEnvironment
 from otx.api.entities.train_parameters import TrainParameters
 from otx.api.usecases.tasks.interfaces.export_interface import ExportType
-from tests.test_suite.e2e_test_system import e2e_pytest_api
+
 
 DEFAULT_CLS_TEMPLATE_DIR = osp.join("src/otx/algorithms/classification", "configs", "efficientnet_b0_cls_incr")
 
@@ -179,7 +179,6 @@ class ClassificationTaskAPIBase:
 
 
 class TestClassificationTaskAPI(ClassificationTaskAPIBase):
-    @e2e_pytest_api
     def test_reading_classification_cls_incr_model_template(self):
         classification_template = [
             "efficientnet_b0_cls_incr",
@@ -191,7 +190,6 @@ class TestClassificationTaskAPI(ClassificationTaskAPIBase):
                 osp.join("src/otx/algorithms/classification", "configs", model_template, "template.yaml")
             )
 
-    @e2e_pytest_api
     @pytest.mark.parametrize(
         "multilabel,hierarchical",
         [(False, False), (True, False), (False, True)],
@@ -221,7 +219,6 @@ class TestClassificationTaskAPI(ClassificationTaskAPIBase):
         assert len(training_progress_curve) > 0
         assert np.all(training_progress_curve[1:] >= training_progress_curve[:-1])
 
-    @e2e_pytest_api
     @pytest.mark.parametrize(
         "multilabel,hierarchical",
         [(False, False), (True, False), (False, True)],
@@ -247,7 +244,6 @@ class TestClassificationTaskAPI(ClassificationTaskAPIBase):
         assert len(inference_progress_curve) > 0
         assert np.all(inference_progress_curve[1:] >= inference_progress_curve[:-1])
 
-    @e2e_pytest_api
     @pytest.mark.parametrize(
         "multilabel,hierarchical",
         [(False, False), (True, False), (False, True)],

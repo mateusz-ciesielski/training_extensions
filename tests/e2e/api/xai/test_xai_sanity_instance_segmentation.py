@@ -23,8 +23,7 @@ from otx.api.entities.model_template import parse_model_template, TaskType
 from otx.api.entities.label_schema import LabelGroup, LabelGroupType, LabelSchemaEntity
 from otx.api.usecases.tasks.interfaces.export_interface import ExportType
 from otx.cli.utils.io import read_model, save_model_data
-from tests.e2e.cli.classification.test_api_xai_sanity_classification import saliency_maps_check
-from tests.test_suite.e2e_test_system import e2e_pytest_api
+from tests.e2e.api.xai.xai_test_helper import saliency_maps_check
 from tests.unit.algorithms.detection.test_helpers import (
     DEFAULT_ISEG_TEMPLATE_DIR,
     init_environment,
@@ -32,9 +31,6 @@ from tests.unit.algorithms.detection.test_helpers import (
 )
 
 torch.manual_seed(0)
-
-assert_text_explain_all = "The number of saliency maps should be equal to the number of all classes."
-assert_text_explain_predicted = "The number of saliency maps should be equal to the number of predicted classes."
 
 
 class TestISegmXAIAPI:
@@ -78,7 +74,6 @@ class TestISegmXAIAPI:
         os.makedirs(temp_dir, exist_ok=True)
         save_model_data(exported_model, temp_dir)
 
-    @e2e_pytest_api
     @pytest.mark.parametrize("tile", [True, False])
     def test_torch_xai_inference(self, tile, tmp_dir_path):
         if tile:

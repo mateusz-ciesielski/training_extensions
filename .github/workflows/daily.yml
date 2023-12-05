@@ -28,6 +28,8 @@ jobs:
             test_args: "tests/e2e/cli/semantic_segmentation"
           - task: "visprompt"
             test_args: "tests/e2e/cli/visual_prompting"
+          - task: "xai"
+            test_args: "tests/e2e/api/xai"
     name: E2E-Test-py310-${{ matrix.task }}
     uses: ./.github/workflows/run_tests_in_tox.yml
     with:
