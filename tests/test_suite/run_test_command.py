@@ -684,6 +684,10 @@ def nncf_optimize_testing(template, root, otx_dir, args):
     if template.entrypoints.nncf is None:
         pytest.skip("NNCF QAT is disabled: entrypoints.nncf in template is not specified")
 
+    nncf_ext_timeout = os.environ.get("NNCF_EXTENSION_LOAD_TIMEOUT")
+    assert nncf_export_testing is not None, "env variable 'NNCF_EXTENSION_LOAD_TIMEOUT' is not defined"
+    assert int(nncf_ext_timeout) == 300, f"expect 300 but {nncf_ext_timeout} for NNCF_EXTENSION_LOAD_TIMEOUT"
+
     template_work_dir = get_template_dir(template, root)
 
     weights_path = f"{template_work_dir}/trained_{template.model_template_id}/models/weights.pth"
