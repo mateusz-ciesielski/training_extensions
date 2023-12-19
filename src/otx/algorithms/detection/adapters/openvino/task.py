@@ -218,7 +218,7 @@ class OpenVINODetectionInferencer(BaseInferencerWithConverter):
             weight_file,
             device=device,
             max_num_requests=num_requests,
-            plugin_config={"PERFORMANCE_HINT": "THROUGHPUT"},
+            plugin_config={"NUM_STREAMS": "1"},
         )
         configuration = {
             **attr.asdict(
